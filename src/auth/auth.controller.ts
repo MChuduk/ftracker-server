@@ -6,7 +6,7 @@ import { SignUpUserDto } from './dto/sign-up-user.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
+  @Post('signup')
   public signUp(@Body() signUpUserDto: SignUpUserDto) {
     return this.authService.signUp(signUpUserDto);
   }
