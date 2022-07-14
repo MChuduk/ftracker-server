@@ -1,0 +1,42 @@
+
+version: '3.4'
+
+services:
+  backend:
+    container_name: ftracker-back
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    volumes:
+      - .:/usr/src/app
+      - ./usr/src/app/node_modules
+    env_file:
+    - .env
+    command: npm run start:dev
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: ftracker-postgres
+    image: postgres:14.4
+    restart: always
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer:4.8.1
+    restart: always
+    ports:
+      - ${ADMINER_PORT}:${ADMINER_PORT}
+
+volumes:
+  pgdata:

@@ -10,6 +10,6 @@ import { AppModule } from './app.module';
 
 async function bindPort(app: INestApplication) {
   const configService = app.get<ConfigService>(ConfigService);
-  const port = configService.get<number>('app.port');
+  const port = configService.get<number>('APP_PORT') || 3000;
   await app.listen(port);
 }
