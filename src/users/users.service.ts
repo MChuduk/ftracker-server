@@ -15,4 +15,14 @@ export class UsersService {
     await this.usersRepository.save(user);
     return user;
   }
+
+  public async findById(id: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ id });
+    return user;
+  }
+
+  public async findBy(options: Partial<User>): Promise<User[]> {
+    const users = await this.usersRepository.findBy({ ...options });
+    return users;
+  }
 }
