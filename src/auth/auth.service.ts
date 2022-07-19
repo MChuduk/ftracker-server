@@ -4,8 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
-import { SignUpDto } from './dto/sign-up.dto';
-import { Tokens } from './types/tokens.type';
+import { SigninDto } from './dto/sign-in.dto';
+import { SignupDto } from './dto/sign-up.dto';
+import { JwtPayload } from './types/jwt-payload.type';
 
 @Injectable()
 export class AuthService {
@@ -16,47 +17,49 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async signUpLocal(signUpDto: SignUpDto): Promise<User> {
-    if (!this.isPasswordConfirmed(signUpDto)) {
-      throw new BadRequestException('confirm the password');
-    }
-    if (await this.isAlreadyRegistered(signUpDto)) {
+  public async signupLocal(signupDto: SignupDto) {
+    if (await this.findCandidate(signupDto.email)) {
       throw new BadRequestException(
-        `user with email ${signUpDto.email} already exists`,
+        `user with email ${signupDto.email} already exists`,
       );
     }
-    const hashPassword = await this.utilsService.hashString(signUpDto.password);
+    const hashPassword = await this.utilsService.hashString(signupDto.password);
     const user = await this.usersService.create({
-      email: signUpDto.email,
+      email: signupDto.email,
       password: hashPassword,
     });
-    console.log(await this.generateTokens(user));
     return user;
   }
 
-  private isPasswordConfirmed(signUpDto: SignUpDto): boolean {
-    return signUpDto.password === signUpDto.confirmPassword;
+  public async signinLocal(signinDto: SigninDto) {
+    const user = await this.findCandidate(signinDto.email);
+    if (!user) {
+      throw new BadRequestException('wrong credentials');
+    }
+    if (!(await this.matchPasswords(signinDto.password, user))) {
+      throw new BadRequestException('wrong credentials');
+    }
+    const tokens = await this.signUser(user);
+    return { user, tokens };
   }
 
-  private async isAlreadyRegistered(signUpDto: SignUpDto): Promise<boolean> {
-    const [candidate] = await this.usersService.findBy({
-      email: signUpDto.email,
+  private async findCandidate(email: string): Promise<User> {
+    const [user] = await this.usersService.findBy({ email });
+    return user;
+  }
+
+  private async matchPasswords(password: string, user: User): Promise<boolean> {
+    const [, salt] = user.password.split(':');
+    const hashPassword = await this.utilsService.hashString(password, salt);
+    return user.password === hashPassword;
+  }
+
+  private async signUser(user: User): Promise<string> {
+    const payload: JwtPayload = { id: user.id, email: user.email };
+    const token = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('APP_JWT_SECRET'),
+      expiresIn: '15m',
     });
-    return candidate ? true : false;
-  }
-
-  private async generateTokens(user: User): Promise<Tokens> {
-    const payload = { id: user.id, email: user.email };
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('APP_JWT_AT_SECRET'),
-        expiresIn: '15m',
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('APP_JWT_RT_SECRET'),
-        expiresIn: '14d',
-      }),
-    ]);
-    return { accessToken, refreshToken };
+    return token;
   }
 }
