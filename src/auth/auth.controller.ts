@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SigninDto } from './dto/sign-in.dto';
 import { SignupDto } from './dto/sign-up.dto';
@@ -26,11 +17,5 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   public signinLocal(@Body() signinDto: SigninDto) {
     return this.authService.signinLocal(signinDto);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('test')
-  test() {
-    return 'hello';
   }
 }
