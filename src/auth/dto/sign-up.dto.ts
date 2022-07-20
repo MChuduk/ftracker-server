@@ -1,5 +1,5 @@
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
-import { IsSecurePassword } from '../decorators/secure-password.decorator';
+import { IsSecurePassword } from '../decorators';
 
 export class SignupDto {
   @IsEmail()
