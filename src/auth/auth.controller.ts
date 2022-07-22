@@ -17,4 +17,9 @@ export class AuthController {
   public signinLocal(@Body() signinDto: SigninDto) {
     return this.authService.signinLocal(signinDto);
   }
+
+  @Post('test')
+  test() {
+    return this.authService.test();
+  }
 }

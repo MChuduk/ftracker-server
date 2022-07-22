@@ -1,6 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Cache } from 'cache-manager';
 import { User } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
@@ -14,6 +20,7 @@ export class AuthService {
     private readonly utilsService: UtilsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   public async signupLocal(signupDto: SignupDto) {
@@ -40,6 +47,11 @@ export class AuthService {
     }
     const tokens = await this.signUser(user);
     return { user, tokens };
+  }
+
+  public async test() {
+    await this.cacheManager.set('test', 123);
+    // return await this.cacheManager.get('test');
   }
 
   private async findCandidate(email: string): Promise<User> {
