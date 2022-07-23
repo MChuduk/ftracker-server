@@ -10,7 +10,7 @@ services:
       target: development
     volumes:
       - .:/usr/src/app
-      - ./usr/src/app/node_modules
+      - .:/usr/src/app/node_modules
     env_file:
     - .env
     command: npm run start:dev
@@ -25,11 +25,11 @@ services:
     image: postgres:14.4
     restart: always
     environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_NAME}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - ${DATABASE_PORT}:${DATABASE_PORT}
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
       - pgdata:/var/lib/postgresql/data
 
