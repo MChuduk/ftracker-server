@@ -10,7 +10,6 @@ services:
       target: development
     volumes:
       - .:/usr/src/app
-      - .:/usr/src/app/node_modules
     env_file:
     - .env
     command: npm run start:dev
@@ -42,6 +41,7 @@ services:
       - cache:/var/lib/redis/data
     
   adminer:
+    container_name: ftracker-adminer
     image: adminer:4.8.1
     restart: always
     ports:
