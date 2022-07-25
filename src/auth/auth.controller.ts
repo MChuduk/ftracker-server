@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+} from '@nestjs/common';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { SigninDto, SignupDto } from './dto';
 
@@ -8,18 +16,30 @@ export class AuthController {
 
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
-  public signupLocal(@Body() signupDto: SignupDto) {
+  public async signupLocal(@Body() signupDto: SignupDto) {
     return this.authService.signupLocal(signupDto);
   }
 
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
-  public signinLocal(@Body() signinDto: SigninDto) {
-    return this.authService.signinLocal(signinDto);
+  public async signinLocal(
+    @Req() request: Request,
+    @Body() signinDto: SigninDto,
+  ) {
+    const user = await this.authService.signinLocal(signinDto);
+    const { accessCookie, refreshCookie } =
+      await this.authService.getAuthCookies(user);
+    request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+    return user;
   }
 
-  @Post('test')
-  test() {
-    return this.authService.test();
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  public async logout() {
+
   }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  public async refresh() {}
 }
