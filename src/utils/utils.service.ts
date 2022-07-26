@@ -7,7 +7,7 @@ export class UtilsService {
   private readonly HASH_SIZE = 32;
   private readonly SALT_SIZE = 16;
 
-  public async hashString(value: string, salt?: string): Promise<string> {
+  public async hashString(value: string, salt?: string) {
     const saltInUse =
       salt || crypto.randomBytes(this.SALT_SIZE).toString('hex');
     const hashBuffer = (await util.promisify(crypto.scrypt)(
@@ -17,5 +17,11 @@ export class UtilsService {
     )) as Buffer;
     const hash = hashBuffer.toString('hex');
     return `${hash}:${saltInUse}`;
+  }
+
+  public async compareHash(valueOrigin: string, valueHashed: string) {
+    const [, salt] = valueHashed.split(':');
+    const hash = await this.hashString(valueOrigin, salt);
+    return hash === valueHashed;
   }
 }
