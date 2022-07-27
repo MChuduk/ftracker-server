@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import * as redisStore from 'cache-manager-redis-store';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAccessGuard } from './auth/guards';
 
 @Module({
   imports: [
@@ -35,6 +37,12 @@ import * as redisStore from 'cache-manager-redis-store';
       }),
     }),
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAccessGuard,
+    },
   ],
 })
 export class AppModule {}

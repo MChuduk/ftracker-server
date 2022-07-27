@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   CACHE_MANAGER,
-  ForbiddenException,
   Inject,
   Injectable,
 } from '@nestjs/common';
@@ -48,27 +47,17 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('wrong credentials');
     }
-    if (!(await this.matchPasswords(signinDto.password, user))) {
+    const passwordMatches = this.utilsService.compareHash(
+      signinDto.password,
+      user.password,
+    );
+    if (!passwordMatches) {
       throw new BadRequestException('wrong credentials');
     }
     return user;
   }
 
-  public async refresh(user: User, refreshToken: string) {
-    const token = await this.findRefreshToken(user.id, refreshToken);
-    if (!token) {
-      throw new ForbiddenException('access denied');
-    }
-    await this.deleteRefreshToken(user.id, refreshToken);
-    return await this.getJwtCookies(user);
-  }
-
-  public async logout(userId: string, refreshToken: string) {
-    await this.deleteRefreshToken(userId, refreshToken);
-  }
-
-  public async getJwtCookies(user: User) {
-    const { accessToken, refreshToken } = await this.signUser(user);
+  public async getAuthCookies(accessToken: string, refreshToken: string) {
     const accessCookie = `Authentication=${accessToken}; HttpOnly; Path=/; Max-Age=${this.ACCESS_TOKEN_EXPIRES_IN}`;
     const refreshCookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.REFRESH_TOKEN_EXPIRES_IN}`;
     return { accessCookie, refreshCookie };
@@ -80,11 +69,7 @@ export class AuthService {
     return { accessCookie, refreshCookie };
   }
 
-  private async matchPasswords(password: string, user: User) {
-    return await this.utilsService.compareHash(password, user.password);
-  }
-
-  private async signUser(user: User) {
+  public async signUser(user: User) {
     const payload: JwtPayload = { id: user.id, email: user.email };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -96,37 +81,43 @@ export class AuthService {
         expiresIn: this.REFRESH_TOKEN_EXPIRES_IN,
       }),
     ]);
-    await this.saveRefreshToken(user.id, refreshToken);
     return { accessToken, refreshToken };
   }
 
-  private async saveRefreshToken(userId: string, refreshToken: string) {
-    const resfreshTokenHashed = await this.utilsService.hashString(
-      refreshToken,
-    );
-    const tokens = await this.getRefreshTokens(userId);
-    tokens.push(resfreshTokenHashed);
-
-    await this.cacheManager.set(userId, tokens);
+  public async getRefreshTokens(userId: string) {
+    const tokensList: string[] = (await this.cacheManager.get(userId)) || [];
+    return tokensList;
   }
 
-  private async deleteRefreshToken(userId: string, refreshToken: string) {
-    refreshToken = await this.findRefreshToken(userId, refreshToken);
-    if (refreshToken) {
-      let tokens = await this.getRefreshTokens(userId);
-      tokens = tokens.filter((token) => token !== refreshToken);
-      await this.cacheManager.set(userId, tokens);
+  public async saveRefreshToken(userId: string, refreshToken: string) {
+    const tokensList = await this.getRefreshTokens(userId);
+    tokensList.push(refreshToken);
+    await this.cacheManager.set(userId, tokensList);
+  }
+
+  public async updateRefreshToken(
+    userId: string,
+    refreshToken: string,
+    newRefreshToken: string,
+  ) {
+    const tokensList = await this.getRefreshTokens(userId);
+    const index = tokensList.indexOf(refreshToken);
+    tokensList[index] = newRefreshToken;
+    await this.cacheManager.set(userId, tokensList);
+  }
+
+  public async deleteRefreshToken(userId: string, refreshToken: string) {
+    let tokensList = await this.getRefreshTokens(userId);
+    tokensList = tokensList.filter((token) => token !== refreshToken);
+    if (tokensList.length === 0) {
+      await this.cacheManager.del(userId);
+      return;
     }
+    await this.cacheManager.set(userId, tokensList);
   }
 
-  private async findRefreshToken(userId: string, refreshToken: string) {
-    const tokens = await this.getRefreshTokens(userId);
-    return tokens.find(
-      async (token) => await this.utilsService.compareHash(refreshToken, token),
-    );
-  }
-
-  private async getRefreshTokens(userId: string): Promise<string[]> {
-    return (await this.cacheManager.get(userId)) || new Array<string>();
+  public async existsRefreshToken(userId: string, refreshToken: string) {
+    const tokensList = await this.getRefreshTokens(userId);
+    return tokensList.includes(refreshToken);
   }
 }

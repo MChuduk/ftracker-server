@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -8,23 +9,25 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { User } from 'src/users/entities';
 import { AuthService } from './auth.service';
-import { GetUserId, GetRefreshToken, GetUser } from './decorators';
+import { GetUserId, GetRefreshToken, GetUser, Public } from './decorators';
 import { SigninDto, SignupDto } from './dto';
+import { JwtRefreshGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
   public async signupLocal(@Body() signupDto: SignupDto) {
     return this.authService.signupLocal(signupDto);
   }
 
+  @Public()
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
   public async signinLocal(
@@ -32,13 +35,17 @@ export class AuthController {
     @Body() signinDto: SigninDto,
   ) {
     const user = await this.authService.signinLocal(signinDto);
+
+    const { accessToken, refreshToken } = await this.authService.signUser(user);
+    await this.authService.saveRefreshToken(user.id, refreshToken);
+
     const { accessCookie, refreshCookie } =
-      await this.authService.getJwtCookies(user);
+      await this.authService.getAuthCookies(accessToken, refreshToken);
     request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+
     return user;
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   public async logout(
@@ -46,24 +53,35 @@ export class AuthController {
     @GetUserId() userId: string,
     @GetRefreshToken() refreshToken: string,
   ) {
+    if (await this.authService.existsRefreshToken(userId, refreshToken)) {
+      await this.authService.deleteRefreshToken(userId, refreshToken);
+    }
     const { accessCookie, refreshCookie } = this.authService.getLogoutCookies();
     request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
-
-    return this.authService.logout(userId, refreshToken);
   }
 
-  @UseGuards(AuthGuard('jwt-refresh'))
+  @UseGuards(JwtRefreshGuard)
   @Get('refresh')
   @HttpCode(HttpStatus.OK)
   public async refresh(
     @Req() request: Request,
     @GetUser() user: User,
-    @GetRefreshToken() refreshToken: string,
+    @GetRefreshToken() oldRefreshToken: string,
   ) {
-    const { accessCookie, refreshCookie } = await this.authService.refresh(
-      user,
+    if (
+      !(await this.authService.existsRefreshToken(user.id, oldRefreshToken))
+    ) {
+      throw new ForbiddenException('access denied');
+    }
+    const { accessToken, refreshToken } = await this.authService.signUser(user);
+    await this.authService.updateRefreshToken(
+      user.id,
+      oldRefreshToken,
       refreshToken,
     );
+
+    const { accessCookie, refreshCookie } =
+      await this.authService.getAuthCookies(accessToken, refreshToken);
     request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
   }
 }
