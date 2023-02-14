@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
-import { User } from 'src/users/entities';
+import { UserEntity } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
 import { SigninDto, SignupDto, SignUpLocalInput } from './dto';
@@ -27,7 +27,11 @@ export class AuthService {
   ) {}
 
   public async signUpLocal(input: SignUpLocalInput) {
-
+    // const user: UserEntity = {
+    //   email: '',
+    //   password: '',
+    // };
+    return this.usersService.create(input);
   }
 
   public async signupLocal(signupDto: SignupDto) {
@@ -73,7 +77,7 @@ export class AuthService {
     return { accessCookie, refreshCookie };
   }
 
-  public async signUser(user: User) {
+  public async signUser(user: UserEntity) {
     const payload: JwtPayload = { id: user.id, email: user.email };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {

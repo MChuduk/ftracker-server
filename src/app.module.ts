@@ -39,7 +39,7 @@ import { ApolloDriver } from '@nestjs/apollo';
         username: configService.get<string>('POSTGRES_USERNAME'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_NAME'),
-        entities: [configService.get<string>('POSTGRES_ENTITIES')],
+        entities: [__dirname + '/../**/*.entity.js'],
         synchronize: true,
       }),
     }),

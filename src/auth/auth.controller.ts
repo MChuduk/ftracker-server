@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { User } from 'src/users/entities';
+import { UserEntity } from 'src/users/entities';
 import { AuthService } from './auth.service';
 import { GetUserId, GetRefreshToken, GetUser, Public } from './decorators';
 import { SigninDto, SignupDto } from './dto';
@@ -65,7 +65,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   public async refresh(
     @Req() request: Request,
-    @GetUser() user: User,
+    @GetUser() user: UserEntity,
     @GetRefreshToken() oldRefreshToken: string,
   ) {
     if (
