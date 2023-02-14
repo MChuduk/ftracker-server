@@ -9,7 +9,7 @@ export class AuthResolver {
 
   @Public()
   @Mutation(() => String)
-  public async signUpLocal(
-    @Args('input') input: SignUpLocalInput,
-  ) {}
+  public async signUpLocal(@Args('input') input: SignUpLocalInput) {
+    return this.authService.signUpLocal(input);
+  }
 }

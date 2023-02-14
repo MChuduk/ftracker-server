@@ -10,7 +10,7 @@ import { Cache } from 'cache-manager';
 import { User } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
-import { SigninDto, SignupDto } from './dto';
+import { SigninDto, SignupDto, SignUpLocalInput } from './dto';
 import { JwtPayload } from './types';
 
 @Injectable()
@@ -25,6 +25,10 @@ export class AuthService {
     private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
+
+  public async signUpLocal(input: SignUpLocalInput) {
+
+  }
 
   public async signupLocal(signupDto: SignupDto) {
     if (await this.usersService.findByEmail(signupDto.email)) {
