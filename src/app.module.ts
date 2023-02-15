@@ -8,6 +8,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAccessGuard } from './auth/guards';
 import { join } from 'path';
 import { ApolloDriver } from '@nestjs/apollo';
+import { dataSourceOptions } from './config/database.config';
 
 @Module({
   imports: [
@@ -29,20 +30,7 @@ import { ApolloDriver } from '@nestjs/apollo';
         ttl: 0,
       }),
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_PORT'),
-        username: configService.get<string>('POSTGRES_USERNAME'),
-        password: configService.get<string>('POSTGRES_PASSWORD'),
-        database: configService.get<string>('POSTGRES_NAME'),
-        entities: [__dirname + '/../**/*.entity.js'],
-        synchronize: true,
-      }),
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
     AuthModule,
   ],
   providers: [
