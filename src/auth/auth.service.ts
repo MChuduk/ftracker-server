@@ -7,67 +7,82 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
+import { SessionsService } from 'src/sessions/sessions.service';
 import { UserEntity } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
-import { SigninDto, SignupDto, SignUpLocalInput } from './dto';
 import { JwtPayload } from './types';
+import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Injectable()
 export class AuthService {
-  private readonly ACCESS_TOKEN_EXPIRES_IN = 60 * 15;
-  private readonly REFRESH_TOKEN_EXPIRES_IN = 60 * 60 * 24 * 7;
+  private readonly ACCESS_TOKEN_EXPIRES_SECONDS = 60 * 15;
+  private readonly REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 
   constructor(
     private readonly usersService: UsersService,
     private readonly utilsService: UtilsService,
+    private readonly sessionsService: SessionsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
-  public async signUpLocal(input: SignUpLocalInput) {
-    // const user: UserEntity = {
-    //   email: '',
-    //   password: '',
-    // };
-    return this.usersService.create(input);
-  }
-
-  public async signupLocal(signupDto: SignupDto) {
-    if (await this.usersService.findByEmail(signupDto.email)) {
+  public async signUpLocal(credentials: SignUpLocalInput) {
+    if (await this.usersService.findByEmail(credentials.email)) {
       throw new BadRequestException(
-        `user with email ${signupDto.email} already exists`,
+        `user with email ${credentials.email} already exists`,
       );
     }
     const passwordHashed = await this.utilsService.hashString(
-      signupDto.password,
+      credentials.password,
     );
     const user = await this.usersService.create({
-      email: signupDto.email,
+      email: credentials.email,
       password: passwordHashed,
     });
     return user;
   }
 
-  public async signinLocal(signinDto: SigninDto) {
-    const user = await this.usersService.findByEmail(signinDto.email);
+  public async signInLocal(credentials: SignInLocalInput) {
+    const user = await this.usersService.findByEmail(credentials.email);
     if (!user) {
       throw new BadRequestException('wrong credentials');
     }
-    const passwordMatches = this.utilsService.compareHash(
-      signinDto.password,
+    const passwordMatches = await this.utilsService.compareHash(
+      credentials.password,
       user.password,
     );
     if (!passwordMatches) {
       throw new BadRequestException('wrong credentials');
     }
-    return user;
+
+    const refreshToken = await this.generateRefreshToken(user);
+    const session = await this.sessionsService.create(refreshToken);
+    const accessToken = await this.generateAccessToken(user, session.id);
+
+    return { session, accessToken, refreshToken };
   }
 
-  public async getAuthCookies(accessToken: string, refreshToken: string) {
-    const accessCookie = `Authentication=${accessToken}; HttpOnly; Path=/; Max-Age=${this.ACCESS_TOKEN_EXPIRES_IN}`;
-    const refreshCookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.REFRESH_TOKEN_EXPIRES_IN}`;
+  public async generateRefreshToken(user: UserEntity) {
+    const payload = { id: user.id, email: user.email };
+    return await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('APP_JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
+    });
+  }
+
+  public async generateAccessToken(user: UserEntity, sessionId: string) {
+    const payload = { id: user.id, email: user.email, sessionId };
+    return await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('APP_JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
+    });
+  }
+
+  public getAuthCookies(accessToken: string, refreshToken: string) {
+    const accessCookie = `Authentication=${accessToken}; HttpOnly; Path=/; Max-Age=${this.ACCESS_TOKEN_EXPIRES_SECONDS}`;
+    const refreshCookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.REFRESH_TOKEN_EXPIRES_SECONDS}`;
     return { accessCookie, refreshCookie };
   }
 
@@ -75,21 +90,6 @@ export class AuthService {
     const accessCookie = `Authentication=; HttpOnly; Path=/; Max-Age=0`;
     const refreshCookie = `Refresh=; HttpOnly; Path=/; Max-Age=0`;
     return { accessCookie, refreshCookie };
-  }
-
-  public async signUser(user: UserEntity) {
-    const payload: JwtPayload = { id: user.id, email: user.email };
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('APP_JWT_ACCESS_TOKEN_SECRET'),
-        expiresIn: this.ACCESS_TOKEN_EXPIRES_IN,
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('APP_JWT_REFRESH_TOKEN_SECRET'),
-        expiresIn: this.REFRESH_TOKEN_EXPIRES_IN,
-      }),
-    ]);
-    return { accessToken, refreshToken };
   }
 
   public async getRefreshTokens(userId: string) {

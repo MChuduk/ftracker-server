@@ -15,6 +15,7 @@ import { dataSourceOptions } from './config/database.config';
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      useGlobalPrefix: true,
     }),
     ConfigModule.forRoot({
       isGlobal: true,

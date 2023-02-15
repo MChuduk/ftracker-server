@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type SessionType {
+  id: ID!
+  refreshToken: String!
+}
+
 type UserType {
   id: ID!
   email: String!
@@ -9,12 +14,16 @@ type UserType {
 }
 
 type Query {
-  """123"""
-  findAllUsers: [UserType!]!
+  signInLocal(credentials: SignInLocalInput!): SessionType!
+}
+
+input SignInLocalInput {
+  email: String!
+  password: String!
 }
 
 type Mutation {
-  signUpLocal(input: SignUpLocalInput!): String!
+  signUpLocal(credentials: SignUpLocalInput!): UserType!
 }
 
 input SignUpLocalInput {

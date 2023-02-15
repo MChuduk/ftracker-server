@@ -24,7 +24,7 @@ export class AuthController {
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
   public async signupLocal(@Body() signupDto: SignupDto) {
-    return this.authService.signupLocal(signupDto);
+    // return this.authService.signupLocal(signupDto);
   }
 
   @Public()
@@ -34,16 +34,16 @@ export class AuthController {
     @Req() request: Request,
     @Body() signinDto: SigninDto,
   ) {
-    const user = await this.authService.signinLocal(signinDto);
+    // const user = await this.authService.signinLocal(signinDto);
 
-    const { accessToken, refreshToken } = await this.authService.signUser(user);
-    await this.authService.saveRefreshToken(user.id, refreshToken);
+    // const { accessToken, refreshToken } = await this.authService.signUser(user);
+    // await this.authService.saveRefreshToken(user.id, refreshToken);
 
-    const { accessCookie, refreshCookie } =
-      await this.authService.getAuthCookies(accessToken, refreshToken);
-    request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+    // const { accessCookie, refreshCookie } =
+    //   await this.authService.getAuthCookies(accessToken, refreshToken);
+    // request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
 
-    return user;
+    // return user;
   }
 
   @Post('logout')
@@ -68,20 +68,20 @@ export class AuthController {
     @GetUser() user: UserEntity,
     @GetRefreshToken() oldRefreshToken: string,
   ) {
-    if (
-      !(await this.authService.existsRefreshToken(user.id, oldRefreshToken))
-    ) {
-      throw new ForbiddenException('access denied');
-    }
-    const { accessToken, refreshToken } = await this.authService.signUser(user);
-    await this.authService.updateRefreshToken(
-      user.id,
-      oldRefreshToken,
-      refreshToken,
-    );
+    // if (
+    //   !(await this.authService.existsRefreshToken(user.id, oldRefreshToken))
+    // ) {
+    //   throw new ForbiddenException('access denied');
+    // }
+    // const { accessToken, refreshToken } = await this.authService.signUser(user);
+    // await this.authService.updateRefreshToken(
+    //   user.id,
+    //   oldRefreshToken,
+    //   refreshToken,
+    // );
 
-    const { accessCookie, refreshCookie } =
-      await this.authService.getAuthCookies(accessToken, refreshToken);
-    request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+    // const { accessCookie, refreshCookie } =
+    //   await this.authService.getAuthCookies(accessToken, refreshToken);
+    // request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
   }
 }
