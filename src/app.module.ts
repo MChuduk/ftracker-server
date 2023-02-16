@@ -16,6 +16,7 @@ import { dataSourceOptions } from './config/database.config';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       useGlobalPrefix: true,
+      context: ({ req, res }) => ({ req, res }),
     }),
     ConfigModule.forRoot({
       isGlobal: true,

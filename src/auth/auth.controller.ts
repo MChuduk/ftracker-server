@@ -12,7 +12,7 @@ import {
 import { Request } from 'express';
 import { UserEntity } from 'src/users/entities';
 import { AuthService } from './auth.service';
-import { GetUserId, GetRefreshToken, GetUser, Public } from './decorators';
+import { GetUserId, RefreshToken, CurrentUser, Public } from './decorators';
 import { SigninDto, SignupDto } from './dto';
 import { JwtRefreshGuard } from './guards';
 
@@ -51,7 +51,7 @@ export class AuthController {
   public async logout(
     @Req() request: Request,
     @GetUserId() userId: string,
-    @GetRefreshToken() refreshToken: string,
+    @RefreshToken() refreshToken: string,
   ) {
     if (await this.authService.existsRefreshToken(userId, refreshToken)) {
       await this.authService.deleteRefreshToken(userId, refreshToken);
@@ -65,8 +65,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   public async refresh(
     @Req() request: Request,
-    @GetUser() user: UserEntity,
-    @GetRefreshToken() oldRefreshToken: string,
+    @CurrentUser() user: UserEntity,
+    @RefreshToken() oldRefreshToken: string,
   ) {
     // if (
     //   !(await this.authService.existsRefreshToken(user.id, oldRefreshToken))

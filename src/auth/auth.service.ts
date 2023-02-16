@@ -57,23 +57,23 @@ export class AuthService {
       throw new BadRequestException('wrong credentials');
     }
 
-    const refreshToken = await this.generateRefreshToken(user);
-    const session = await this.sessionsService.create(refreshToken);
-    const accessToken = await this.generateAccessToken(user, session.id);
+    const session = await this.sessionsService.create(user);
+    const refreshToken = await this.generateRefreshToken(session.id);
+    const accessToken = await this.generateAccessToken(user.id);
 
     return { session, accessToken, refreshToken };
   }
 
-  public async generateRefreshToken(user: UserEntity) {
-    const payload = { id: user.id, email: user.email };
+  public async generateRefreshToken(sessionId: string) {
+    const payload = { sessionId };
     return await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('APP_JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
     });
   }
 
-  public async generateAccessToken(user: UserEntity, sessionId: string) {
-    const payload = { id: user.id, email: user.email, sessionId };
+  public async generateAccessToken(userId: string) {
+    const payload = { userId };
     return await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('APP_JWT_ACCESS_TOKEN_SECRET'),
       expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,

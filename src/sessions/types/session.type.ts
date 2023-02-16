@@ -6,5 +6,5 @@ export class SessionType {
   id: string;
 
   @Field()
-  refreshToken: string;
+  userId: string;
 }
