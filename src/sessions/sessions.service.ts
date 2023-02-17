@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Session } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/users/entities';
 import { Repository } from 'typeorm';
@@ -25,9 +25,19 @@ export class SessionsService {
   }
 
   public async findById(sessionId: string) {
+    console.log(sessionId);
     return await this.sessionsRepository
       .createQueryBuilder('session')
       .where('session.id = :sessionId', { sessionId })
       .getOne();
+  }
+
+  public async delete(sessionId: string) {
+    await this.sessionsRepository
+      .createQueryBuilder('sessions')
+      .delete()
+      .from(SessionEntity)
+      .where('id = :sessionId', { sessionId })
+      .execute();
   }
 }

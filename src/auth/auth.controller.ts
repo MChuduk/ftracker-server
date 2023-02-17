@@ -12,7 +12,7 @@ import {
 import { Request } from 'express';
 import { UserEntity } from 'src/users/entities';
 import { AuthService } from './auth.service';
-import { RefreshToken, CurrentUser, Public } from './decorators';
+import { RefreshToken, Public } from './decorators';
 import { SigninDto, SignupDto } from './dto';
 import { JwtRefreshGuard } from './guards';
 
@@ -64,7 +64,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   public async refresh(
     @Req() request: Request,
-    @CurrentUser() user: UserEntity,
+    // @CurrentUser() user: UserEntity,
     @RefreshToken() oldRefreshToken: string,
   ) {
     // if (

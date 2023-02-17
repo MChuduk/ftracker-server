@@ -14,20 +14,21 @@ type UserType {
 }
 
 type Query {
-  signInLocal(credentials: SignInLocalInput!): SessionType!
   test: String!
-}
-
-input SignInLocalInput {
-  email: String!
-  password: String!
 }
 
 type Mutation {
   signUpLocal(credentials: SignUpLocalInput!): UserType!
+  signInLocal(credentials: SignInLocalInput!): SessionType!
+  logout: SessionType!
 }
 
 input SignUpLocalInput {
+  email: String!
+  password: String!
+}
+
+input SignInLocalInput {
   email: String!
   password: String!
 }

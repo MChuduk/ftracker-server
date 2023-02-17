@@ -9,10 +9,10 @@ export const SessionId = createParamDecorator(
   async (_, context: ExecutionContext) => {
     const ctx = GqlExecutionContext.create(context);
     const request: Request = ctx.getContext().req;
-    const accessToken: string = request?.cookies?.Authentication;
+
     const refreshToken: string = request?.cookies?.Refresh;
 
-    if (!accessToken || !refreshToken) return null;
+    if (!refreshToken) return null;
 
     try {
       const configService = new ConfigService();

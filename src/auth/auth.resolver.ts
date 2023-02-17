@@ -1,4 +1,4 @@
-import { ExecutionContext, Req, Session } from '@nestjs/common';
+import { Req, Session, UnauthorizedException } from '@nestjs/common';
 import {
   Args,
   Context,
@@ -14,7 +14,7 @@ import { SessionType } from 'src/sessions/types';
 import { UserEntity } from 'src/users/entities';
 import { UserType } from 'src/users/types';
 import { AuthService } from './auth.service';
-import { CurrentUser, Public, SessionId } from './decorators';
+import { Public, SessionId } from './decorators';
 import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Resolver()
@@ -31,10 +31,10 @@ export class AuthResolver {
   }
 
   @Public()
-  @Query(() => SessionType)
+  @Mutation(() => SessionType)
   public async signInLocal(
-    @SessionId() sessionId: string,
     @Context('res') res: Response,
+    @SessionId() sessionId: string,
     @Args('credentials') credentials: SignInLocalInput,
   ) {
     if (sessionId) {
@@ -45,7 +45,7 @@ export class AuthResolver {
     const { session, accessToken, refreshToken } =
       await this.authService.signInLocal(credentials);
 
-    const { accessCookie, refreshCookie } = this.authService.getAuthCookies(
+    const { accessCookie, refreshCookie } = this.getAuthCookies(
       accessToken,
       refreshToken,
     );
@@ -54,9 +54,34 @@ export class AuthResolver {
     return session;
   }
 
+  @Mutation(() => SessionType)
+  public async logout(
+    @Context('res') res: Response,
+    @SessionId() sessionId: string,
+  ) {
+    const session = await this.sessionsService.findById(sessionId);
+    if (session) {
+      await this.sessionsService.delete(sessionId);
+    } else {
+      throw new UnauthorizedException();
+    }
+    return session;
+  }
+
   @Query(() => String)
-  public async test(@CurrentUser() user: UserEntity) {
-    console.log(user);
+  public async test() {
     return `user`;
+  }
+
+  private getAuthCookies(accessToken: string, refreshToken: string) {
+    const accessCookie = `Authentication=${accessToken}; HttpOnly; Path=/; Max-Age=${this.authService.ACCESS_TOKEN_EXPIRES_SECONDS}`;
+    const refreshCookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.authService.REFRESH_TOKEN_EXPIRES_SECONDS}`;
+    return { accessCookie, refreshCookie };
+  }
+
+  private getLogoutCookies() {
+    const accessCookie = `Authentication=; HttpOnly; Path=/; Max-Age=0`;
+    const refreshCookie = `Refresh=; HttpOnly; Path=/; Max-Age=0`;
+    return { accessCookie, refreshCookie };
   }
 }

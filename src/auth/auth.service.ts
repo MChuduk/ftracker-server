@@ -16,8 +16,8 @@ import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Injectable()
 export class AuthService {
-  private readonly ACCESS_TOKEN_EXPIRES_SECONDS = 60 * 15;
-  private readonly REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
+  public readonly ACCESS_TOKEN_EXPIRES_SECONDS = 60 * 15;
+  public readonly REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 
   constructor(
     private readonly usersService: UsersService,
@@ -61,18 +61,6 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.signUser(user, session.id);
 
     return { session, accessToken, refreshToken };
-  }
-
-  public getAuthCookies(accessToken: string, refreshToken: string) {
-    const accessCookie = `Authentication=${accessToken}; HttpOnly; Path=/; Max-Age=${this.ACCESS_TOKEN_EXPIRES_SECONDS}`;
-    const refreshCookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.REFRESH_TOKEN_EXPIRES_SECONDS}`;
-    return { accessCookie, refreshCookie };
-  }
-
-  public getLogoutCookies() {
-    const accessCookie = `Authentication=; HttpOnly; Path=/; Max-Age=0`;
-    const refreshCookie = `Refresh=; HttpOnly; Path=/; Max-Age=0`;
-    return { accessCookie, refreshCookie };
   }
 
   public async getRefreshTokens(userId: string) {
