@@ -13,7 +13,7 @@ export class SessionsService {
 
   public async create(user: UserEntity) {
     const session = this.sessionsRepository.create({ user });
-    
+
     await this.sessionsRepository
       .createQueryBuilder()
       .insert()
@@ -22,5 +22,12 @@ export class SessionsService {
       .execute();
 
     return session;
+  }
+
+  public async findById(sessionId: string) {
+    return await this.sessionsRepository
+      .createQueryBuilder('session')
+      .where('session.id = :sessionId', { sessionId })
+      .getOne();
   }
 }

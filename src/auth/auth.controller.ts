@@ -12,7 +12,7 @@ import {
 import { Request } from 'express';
 import { UserEntity } from 'src/users/entities';
 import { AuthService } from './auth.service';
-import { GetUserId, RefreshToken, CurrentUser, Public } from './decorators';
+import { RefreshToken, CurrentUser, Public } from './decorators';
 import { SigninDto, SignupDto } from './dto';
 import { JwtRefreshGuard } from './guards';
 
@@ -50,14 +50,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   public async logout(
     @Req() request: Request,
-    @GetUserId() userId: string,
     @RefreshToken() refreshToken: string,
   ) {
-    if (await this.authService.existsRefreshToken(userId, refreshToken)) {
-      await this.authService.deleteRefreshToken(userId, refreshToken);
-    }
-    const { accessCookie, refreshCookie } = this.authService.getLogoutCookies();
-    request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+    // if (await this.authService.existsRefreshToken(userId, refreshToken)) {
+    //   await this.authService.deleteRefreshToken(userId, refreshToken);
+    // }
+    // const { accessCookie, refreshCookie } = this.authService.getLogoutCookies();
+    // request.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
   }
 
   @UseGuards(JwtRefreshGuard)

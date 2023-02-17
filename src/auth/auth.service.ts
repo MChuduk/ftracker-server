@@ -11,7 +11,7 @@ import { SessionsService } from 'src/sessions/sessions.service';
 import { UserEntity } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
-import { JwtPayload } from './types';
+import JwtPayload from './interfaces/jwt-payload.interface';
 import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Injectable()
@@ -58,26 +58,9 @@ export class AuthService {
     }
 
     const session = await this.sessionsService.create(user);
-    const refreshToken = await this.generateRefreshToken(session.id);
-    const accessToken = await this.generateAccessToken(user.id);
+    const { accessToken, refreshToken } = await this.signUser(user, session.id);
 
     return { session, accessToken, refreshToken };
-  }
-
-  public async generateRefreshToken(sessionId: string) {
-    const payload = { sessionId };
-    return await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('APP_JWT_REFRESH_TOKEN_SECRET'),
-      expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
-    });
-  }
-
-  public async generateAccessToken(userId: string) {
-    const payload = { userId };
-    return await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('APP_JWT_ACCESS_TOKEN_SECRET'),
-      expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
-    });
   }
 
   public getAuthCookies(accessToken: string, refreshToken: string) {
@@ -127,5 +110,20 @@ export class AuthService {
   public async existsRefreshToken(userId: string, refreshToken: string) {
     const tokensList = await this.getRefreshTokens(userId);
     return tokensList.includes(refreshToken);
+  }
+
+  private async signUser(user: UserEntity, sessionId: string) {
+    const payload: JwtPayload = { userId: user.id, sessionId };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('APP_JWT_ACCESS_TOKEN_SECRET'),
+        expiresIn: this.ACCESS_TOKEN_EXPIRES_SECONDS,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('APP_JWT_REFRESH_TOKEN_SECRET'),
+        expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
+      }),
+    ]);
+    return { accessToken, refreshToken };
   }
 }
