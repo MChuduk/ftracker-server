@@ -21,6 +21,7 @@ type Mutation {
   signUpLocal(credentials: SignUpLocalInput!): UserType!
   signInLocal(credentials: SignInLocalInput!): SessionType!
   logout: SessionType!
+  refresh: SessionType!
 }
 
 input SignUpLocalInput {

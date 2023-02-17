@@ -1,17 +1,8 @@
-import { Req, Session, UnauthorizedException } from '@nestjs/common';
-import {
-  Args,
-  Context,
-  GqlExecutionContext,
-  GraphQLExecutionContext,
-  Mutation,
-  Query,
-  Resolver,
-} from '@nestjs/graphql';
-import { Request, Response } from 'express';
+import { HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Response } from 'express';
 import { SessionsService } from 'src/sessions/sessions.service';
 import { SessionType } from 'src/sessions/types';
-import { UserEntity } from 'src/users/entities';
 import { UserType } from 'src/users/types';
 import { AuthService } from './auth.service';
 import { Public, SessionId } from './decorators';
@@ -39,6 +30,7 @@ export class AuthResolver {
   ) {
     if (sessionId) {
       const session = await this.sessionsService.findById(sessionId);
+      console.log('123', session.user);
       if (session) return session;
     }
 
@@ -49,6 +41,7 @@ export class AuthResolver {
       accessToken,
       refreshToken,
     );
+    console.log('2');
     res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
 
     return session;
@@ -65,7 +58,16 @@ export class AuthResolver {
     } else {
       throw new UnauthorizedException();
     }
+
+    const { accessCookie, refreshCookie } = this.getLogoutCookies();
+    res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+
     return session;
+  }
+
+  @Mutation(() => SessionType)
+  public async refresh(@SessionId() sessionId: string) {
+    return await this.authService.refresh(sessionId);
   }
 
   @Query(() => String)

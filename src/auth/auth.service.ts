@@ -1,12 +1,6 @@
-import {
-  BadRequestException,
-  CACHE_MANAGER,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Cache } from 'cache-manager';
 import { SessionsService } from 'src/sessions/sessions.service';
 import { UserEntity } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
@@ -25,7 +19,6 @@ export class AuthService {
     private readonly sessionsService: SessionsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   public async signUpLocal(credentials: SignUpLocalInput) {
@@ -63,41 +56,10 @@ export class AuthService {
     return { session, accessToken, refreshToken };
   }
 
-  public async getRefreshTokens(userId: string) {
-    const tokensList: string[] = (await this.cacheManager.get(userId)) || [];
-    return tokensList;
-  }
-
-  public async saveRefreshToken(userId: string, refreshToken: string) {
-    const tokensList = await this.getRefreshTokens(userId);
-    tokensList.push(refreshToken);
-    await this.cacheManager.set(userId, tokensList);
-  }
-
-  public async updateRefreshToken(
-    userId: string,
-    refreshToken: string,
-    newRefreshToken: string,
-  ) {
-    const tokensList = await this.getRefreshTokens(userId);
-    const index = tokensList.indexOf(refreshToken);
-    tokensList[index] = newRefreshToken;
-    await this.cacheManager.set(userId, tokensList);
-  }
-
-  public async deleteRefreshToken(userId: string, refreshToken: string) {
-    let tokensList = await this.getRefreshTokens(userId);
-    tokensList = tokensList.filter((token) => token !== refreshToken);
-    if (tokensList.length === 0) {
-      await this.cacheManager.del(userId);
-      return;
-    }
-    await this.cacheManager.set(userId, tokensList);
-  }
-
-  public async existsRefreshToken(userId: string, refreshToken: string) {
-    const tokensList = await this.getRefreshTokens(userId);
-    return tokensList.includes(refreshToken);
+  public async refresh(sessionId: string) {
+    const session = await this.sessionsService.findById(sessionId);
+    console.log(session);
+    return session;
   }
 
   private async signUser(user: UserEntity, sessionId: string) {

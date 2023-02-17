@@ -26,10 +26,12 @@ export class SessionsService {
 
   public async findById(sessionId: string) {
     console.log(sessionId);
-    return await this.sessionsRepository
+    const query = await this.sessionsRepository
       .createQueryBuilder('session')
-      .where('session.id = :sessionId', { sessionId })
-      .getOne();
+      .leftJoinAndSelect('session.user', 'user')
+      .where('session.id = :sessionId', { sessionId });
+
+    return query.getOne();
   }
 
   public async delete(sessionId: string) {
