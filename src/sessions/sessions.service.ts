@@ -1,4 +1,4 @@
-import { Injectable, Session } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/users/entities';
 import { Repository } from 'typeorm';
@@ -11,7 +11,7 @@ export class SessionsService {
     private readonly sessionsRepository: Repository<SessionEntity>,
   ) {}
 
-  public async create(user: UserEntity) {
+  public async create(user: UserEntity): Promise<SessionEntity> {
     const session = this.sessionsRepository.create({ user });
 
     await this.sessionsRepository
@@ -24,7 +24,7 @@ export class SessionsService {
     return session;
   }
 
-  public async findById(sessionId: string) {
+  public async findById(sessionId: string): Promise<SessionEntity> {
     console.log(sessionId);
     const query = await this.sessionsRepository
       .createQueryBuilder('session')
@@ -34,7 +34,7 @@ export class SessionsService {
     return query.getOne();
   }
 
-  public async delete(sessionId: string) {
+  public async delete(sessionId: string): Promise<void> {
     await this.sessionsRepository
       .createQueryBuilder('sessions')
       .delete()

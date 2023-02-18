@@ -10,7 +10,7 @@ export class UsersService {
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  public async create(user: UserEntity) {
+  public async create(user: UserEntity): Promise<UserEntity> {
     await this.usersRepository
       .createQueryBuilder()
       .insert()
@@ -21,14 +21,16 @@ export class UsersService {
     return await this.findByEmail(user.email);
   }
 
-  public async findByEmail(email: string) {
+  public async findByEmail(email: string): Promise<UserEntity> {
     return await this.usersRepository
       .createQueryBuilder('user')
       .where('user.email = :email', { email })
       .getOne();
   }
 
-  public async findBy(options: Partial<UserEntity>): Promise<UserEntity[]> {
+  public async findBy(
+    options: Partial<UserEntity>,
+  ): Promise<Array<UserEntity>> {
     const users = await this.usersRepository.findBy({ ...options });
     return users;
   }

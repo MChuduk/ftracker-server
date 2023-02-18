@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { UserType } from 'src/users/types';
 
 @ObjectType()
 export class SessionType {
@@ -6,5 +7,5 @@ export class SessionType {
   id: string;
 
   @Field()
-  userId: string;
+  user: UserType;
 }

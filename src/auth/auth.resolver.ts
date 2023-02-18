@@ -1,4 +1,4 @@
-import { HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Response } from 'express';
 import { SessionsService } from 'src/sessions/sessions.service';
@@ -29,19 +29,12 @@ export class AuthResolver {
     @Args('credentials') credentials: SignInLocalInput,
   ) {
     if (sessionId) {
-      const session = await this.sessionsService.findById(sessionId);
-      console.log('123', session.user);
-      if (session) return session;
+      await this.sessionsService.delete(sessionId);
     }
 
-    const { session, accessToken, refreshToken } =
+    const { session, accessCookie, refreshCookie } =
       await this.authService.signInLocal(credentials);
 
-    const { accessCookie, refreshCookie } = this.getAuthCookies(
-      accessToken,
-      refreshToken,
-    );
-    console.log('2');
     res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
 
     return session;
@@ -52,14 +45,9 @@ export class AuthResolver {
     @Context('res') res: Response,
     @SessionId() sessionId: string,
   ) {
-    const session = await this.sessionsService.findById(sessionId);
-    if (session) {
-      await this.sessionsService.delete(sessionId);
-    } else {
-      throw new UnauthorizedException();
-    }
+    const { session, accessCookie, refreshCookie } =
+      await this.authService.logout(sessionId);
 
-    const { accessCookie, refreshCookie } = this.getLogoutCookies();
     res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
 
     return session;
@@ -73,17 +61,5 @@ export class AuthResolver {
   @Query(() => String)
   public async test() {
     return `user`;
-  }
-
-  private getAuthCookies(accessToken: string, refreshToken: string) {
-    const accessCookie = `Authentication=${accessToken}; HttpOnly; Path=/; Max-Age=${this.authService.ACCESS_TOKEN_EXPIRES_SECONDS}`;
-    const refreshCookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.authService.REFRESH_TOKEN_EXPIRES_SECONDS}`;
-    return { accessCookie, refreshCookie };
-  }
-
-  private getLogoutCookies() {
-    const accessCookie = `Authentication=; HttpOnly; Path=/; Max-Age=0`;
-    const refreshCookie = `Refresh=; HttpOnly; Path=/; Max-Age=0`;
-    return { accessCookie, refreshCookie };
   }
 }

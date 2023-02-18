@@ -1,17 +1,23 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { SessionEntity } from 'src/sessions/entities';
 import { SessionsService } from 'src/sessions/sessions.service';
 import { UserEntity } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
-import JwtPayload from './interfaces/jwt-payload.interface';
+import AccessTokenPayload from './interfaces/access-token-payload.interface';
+import RefreshTokenPayload from './interfaces/refresh-token-payload.interface';
 import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Injectable()
 export class AuthService {
-  public readonly ACCESS_TOKEN_EXPIRES_SECONDS = 60 * 15;
-  public readonly REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
+  private readonly ACCESS_TOKEN_EXPIRES_SECONDS = 60 * 15;
+  private readonly REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 
   constructor(
     private readonly usersService: UsersService,
@@ -21,7 +27,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async signUpLocal(credentials: SignUpLocalInput) {
+  public async signUpLocal(credentials: SignUpLocalInput): Promise<UserEntity> {
     if (await this.usersService.findByEmail(credentials.email)) {
       throw new BadRequestException(
         `user with email ${credentials.email} already exists`,
@@ -51,29 +57,63 @@ export class AuthService {
     }
 
     const session = await this.sessionsService.create(user);
-    const { accessToken, refreshToken } = await this.signUser(user, session.id);
+    const accessToken = await this.generateAccessToken({ userId: user.id });
+    const refreshToken = await this.generateRefreshToken({
+      sessionId: session.id,
+    });
+    const { accessCookie, refreshCookie } = this.getAuthCookies(
+      accessToken,
+      refreshToken,
+    );
 
-    return { session, accessToken, refreshToken };
+    return { session, accessCookie, refreshCookie };
   }
 
-  public async refresh(sessionId: string) {
+  public async logout(sessionId: string) {
     const session = await this.sessionsService.findById(sessionId);
-    console.log(session);
+    if (session) {
+      await this.sessionsService.delete(sessionId);
+    } else {
+      throw new UnauthorizedException();
+    }
+
+    const { accessCookie, refreshCookie } = this.getLogoutCookies();
+
+    return { session, accessCookie, refreshCookie };
+  }
+
+  public async refresh(sessionId: string): Promise<SessionEntity> {
+    const session = await this.sessionsService.findById(sessionId);
     return session;
   }
 
-  private async signUser(user: UserEntity, sessionId: string) {
-    const payload: JwtPayload = { userId: user.id, sessionId };
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('APP_JWT_ACCESS_TOKEN_SECRET'),
-        expiresIn: this.ACCESS_TOKEN_EXPIRES_SECONDS,
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('APP_JWT_REFRESH_TOKEN_SECRET'),
-        expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
-      }),
-    ]);
-    return { accessToken, refreshToken };
+  private async generateAccessToken(
+    payload: AccessTokenPayload,
+  ): Promise<string> {
+    return this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('APP_JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: this.ACCESS_TOKEN_EXPIRES_SECONDS,
+    });
+  }
+
+  private async generateRefreshToken(
+    payload: RefreshTokenPayload,
+  ): Promise<string> {
+    return this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('APP_JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: this.REFRESH_TOKEN_EXPIRES_SECONDS,
+    });
+  }
+
+  private getAuthCookies(accessToken: string, refreshToken: string) {
+    const accessCookie = `Authentication=${accessToken}; HttpOnly; Path=/; Max-Age=${this.ACCESS_TOKEN_EXPIRES_SECONDS}`;
+    const refreshCookie = `Refresh=${refreshToken}; HttpOnly; Path=/; Max-Age=${this.REFRESH_TOKEN_EXPIRES_SECONDS}`;
+    return { accessCookie, refreshCookie };
+  }
+
+  private getLogoutCookies() {
+    const accessCookie = `Authentication=; HttpOnly; Path=/; Max-Age=0`;
+    const refreshCookie = `Refresh=; HttpOnly; Path=/; Max-Age=0`;
+    return { accessCookie, refreshCookie };
   }
 }
