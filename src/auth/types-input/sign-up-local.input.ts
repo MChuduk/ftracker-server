@@ -1,13 +1,16 @@
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsEmail, MaxLength, MinLength } from 'class-validator';
 import { IsSecurePassword } from '../decorators';
 
-export class SignupDto {
+@InputType()
+export class SignUpLocalInput {
+  @Field()
   @IsEmail()
   @MinLength(10)
   @MaxLength(50)
   email: string;
 
-  @IsString()
+  @Field()
   @MinLength(10)
   @MaxLength(50)
   @IsSecurePassword()
