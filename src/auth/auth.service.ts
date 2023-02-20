@@ -43,7 +43,10 @@ export class AuthService {
     return user;
   }
 
-  public async signInLocal(credentials: SignInLocalInput) {
+  public async signInLocal(sessionId: string, credentials: SignInLocalInput) {
+    if (sessionId) {
+      await this.sessionsService.delete(sessionId);
+    }
     const user = await this.usersService.findByEmail(credentials.email);
     if (!user) {
       throw new BadRequestException('wrong credentials');
@@ -61,6 +64,10 @@ export class AuthService {
     const refreshToken = await this.generateRefreshToken({
       sessionId: session.id,
     });
+    const refreshTokenHashed = await this.utilsService.hashString(refreshToken);
+
+    await this.sessionsService.setRefreshToken(session.id, refreshTokenHashed);
+
     const { accessCookie, refreshCookie } = this.getAuthCookies(
       accessToken,
       refreshToken,
@@ -82,9 +89,33 @@ export class AuthService {
     return { session, accessCookie, refreshCookie };
   }
 
-  public async refresh(sessionId: string): Promise<SessionEntity> {
+  public async refresh(sessionId: string, oldRefreshToken: string) {
     const session = await this.sessionsService.findById(sessionId);
-    return session;
+
+    const refreshTokenMathes = await this.utilsService.compareHash(
+      oldRefreshToken,
+      session.refreshToken,
+    );
+    if (!refreshTokenMathes) {
+      throw new UnauthorizedException();
+    }
+
+    const accessToken = await this.generateAccessToken({
+      userId: session.user.id,
+    });
+    const refreshToken = await this.generateRefreshToken({
+      sessionId: session.id,
+    });
+    const refreshTokenHashed = await this.utilsService.hashString(refreshToken);
+
+    await this.sessionsService.setRefreshToken(sessionId, refreshTokenHashed);
+
+    const { accessCookie, refreshCookie } = this.getAuthCookies(
+      accessToken,
+      refreshToken,
+    );
+
+    return { session, accessCookie, refreshCookie };
   }
 
   private async generateAccessToken(

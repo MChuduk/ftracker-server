@@ -8,4 +8,7 @@ export class SessionType {
 
   @Field()
   user: UserType;
+
+  @Field()
+  refreshToken: string;
 }

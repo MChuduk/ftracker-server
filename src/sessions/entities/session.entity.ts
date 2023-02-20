@@ -1,5 +1,5 @@
 import { UserEntity } from 'src/users/entities';
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('sessions')
 export class SessionEntity {
@@ -8,4 +8,7 @@ export class SessionEntity {
 
   @ManyToOne(() => UserEntity)
   user: UserEntity;
+
+  @Column({ nullable: true })
+  refreshToken: string;
 }

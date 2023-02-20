@@ -25,7 +25,6 @@ export class SessionsService {
   }
 
   public async findById(sessionId: string): Promise<SessionEntity> {
-    console.log(sessionId);
     const query = await this.sessionsRepository
       .createQueryBuilder('session')
       .leftJoinAndSelect('session.user', 'user')
@@ -40,6 +39,18 @@ export class SessionsService {
       .delete()
       .from(SessionEntity)
       .where('id = :sessionId', { sessionId })
+      .execute();
+  }
+
+  public async setRefreshToken(
+    sessionId: string,
+    refreshToken: string,
+  ): Promise<void> {
+    const session = await this.findById(sessionId);
+    session.refreshToken = refreshToken;
+    await this.sessionsRepository
+      .createQueryBuilder()
+      .update(session)
       .execute();
   }
 }

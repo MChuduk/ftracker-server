@@ -1,7 +1,5 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { Response } from 'express';
-import { SessionsService } from 'src/sessions/sessions.service';
+import { Request, Response } from 'express';
 import { SessionType } from 'src/sessions/types';
 import { UserType } from 'src/users/types';
 import { AuthService } from './auth.service';
@@ -10,10 +8,7 @@ import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Resolver()
 export class AuthResolver {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly sessionsService: SessionsService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Mutation(() => UserType)
@@ -28,12 +23,8 @@ export class AuthResolver {
     @SessionId() sessionId: string,
     @Args('credentials') credentials: SignInLocalInput,
   ) {
-    if (sessionId) {
-      await this.sessionsService.delete(sessionId);
-    }
-
     const { session, accessCookie, refreshCookie } =
-      await this.authService.signInLocal(credentials);
+      await this.authService.signInLocal(sessionId, credentials);
 
     res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
 
@@ -54,8 +45,18 @@ export class AuthResolver {
   }
 
   @Mutation(() => SessionType)
-  public async refresh(@SessionId() sessionId: string) {
-    return await this.authService.refresh(sessionId);
+  public async refresh(
+    @Context('req') req: Request,
+    @Context('res') res: Response,
+    @SessionId() sessionId: string,
+  ) {
+    const oldRefreshToken = req?.cookies?.Refresh;
+    const { session, accessCookie, refreshCookie } =
+      await this.authService.refresh(sessionId, oldRefreshToken);
+
+    res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+
+    return session;
   }
 
   @Query(() => String)

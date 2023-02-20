@@ -11,6 +11,7 @@ type UserType {
 type SessionType {
   id: ID!
   user: UserType!
+  refreshToken: String!
 }
 
 type Query {
