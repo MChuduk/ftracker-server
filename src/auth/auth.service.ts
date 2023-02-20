@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { SessionEntity } from 'src/sessions/entities';
 import { SessionsService } from 'src/sessions/sessions.service';
 import { UserEntity } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
