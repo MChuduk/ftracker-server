@@ -59,6 +59,7 @@ export class AuthResolver {
     return session;
   }
 
+  @Public()
   @Query(() => String)
   public async test() {
     return `user`;

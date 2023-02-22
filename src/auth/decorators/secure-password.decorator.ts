@@ -18,7 +18,7 @@ export function IsSecurePassword(validationOptions?: ValidationOptions) {
             return false;
           }
           if (!/[a-z]/.test(value)) {
-            this.error = 'password must contains lower letters';
+            this.error = 'password must contains lowercase letters';
             return false;
           }
           if (!/[0-9]/.test(value)) {
