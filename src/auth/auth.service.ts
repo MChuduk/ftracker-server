@@ -36,6 +36,7 @@ export class AuthService {
       credentials.password,
     );
     const user = await this.usersService.create({
+      displayName: credentials.displayName,
       email: credentials.email,
       password: passwordHashed,
     });

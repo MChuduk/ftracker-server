@@ -6,6 +6,9 @@ export class UserType {
   id: string;
 
   @Field()
+  displayName: string;
+
+  @Field()
   email: string;
 
   @Field()

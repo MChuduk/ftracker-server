@@ -4,6 +4,7 @@
 
 type UserType {
   id: ID!
+  displayName: String!
   email: String!
   password: String!
 }
@@ -26,6 +27,7 @@ type Mutation {
 }
 
 input SignUpLocalInput {
+  displayName: String!
   email: String!
   password: String!
 }
