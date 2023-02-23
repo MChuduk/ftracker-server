@@ -46,11 +46,11 @@ export class SessionsService {
     sessionId: string,
     refreshToken: string,
   ): Promise<void> {
-    const session = await this.findById(sessionId);
-    session.refreshToken = refreshToken;
     await this.sessionsRepository
       .createQueryBuilder()
-      .update(session)
+      .update(SessionEntity)
+      .set({ refreshToken })
+      .where('id = :sessionId', { sessionId })
       .execute();
   }
 }

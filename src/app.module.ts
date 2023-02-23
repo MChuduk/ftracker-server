@@ -12,6 +12,10 @@ import { dataSourceOptions } from './config/database.config';
 @Module({
   imports: [
     GraphQLModule.forRoot({
+      cors: {
+        origin: 'http://localhost:3000',
+        credentials: true,
+      },
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       useGlobalPrefix: true,
