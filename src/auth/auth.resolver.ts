@@ -59,6 +59,11 @@ export class AuthResolver {
     return session;
   }
 
+  @Query(() => UserType)
+  public async currentUser(@SessionId() sessionId: string) {
+    return await this.authService.getCurrentUser(sessionId);
+  }
+
   @Public()
   @Query(() => String)
   public async test() {

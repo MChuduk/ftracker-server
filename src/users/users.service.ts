@@ -21,17 +21,17 @@ export class UsersService {
     return await this.findByEmail(user.email);
   }
 
+  public async findById(userId: string): Promise<UserEntity> {
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.id = :userId', { userId })
+      .getOne();
+  }
+
   public async findByEmail(email: string): Promise<UserEntity> {
     return await this.usersRepository
       .createQueryBuilder('user')
       .where('user.email = :email', { email })
       .getOne();
-  }
-
-  public async findBy(
-    options: Partial<UserEntity>,
-  ): Promise<Array<UserEntity>> {
-    const users = await this.usersRepository.findBy({ ...options });
-    return users;
   }
 }
