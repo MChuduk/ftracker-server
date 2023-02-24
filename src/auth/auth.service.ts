@@ -118,6 +118,11 @@ export class AuthService {
     return { session, accessCookie, refreshCookie };
   }
 
+  public async getCurrentUser(sessionId: string): Promise<UserEntity> {
+    const session = await this.sessionsService.findById(sessionId);
+    return await session?.user;
+  }
+
   private async generateAccessToken(
     payload: AccessTokenPayload,
   ): Promise<string> {

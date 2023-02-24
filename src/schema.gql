@@ -16,6 +16,7 @@ type SessionType {
 }
 
 type Query {
+  currentUser: UserType!
   test: String!
 }
 
