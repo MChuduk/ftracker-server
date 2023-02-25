@@ -31,6 +31,7 @@ export class AuthResolver {
     return session;
   }
 
+  @Public()
   @Mutation(() => SessionType)
   public async logout(
     @Context('res') res: Response,
