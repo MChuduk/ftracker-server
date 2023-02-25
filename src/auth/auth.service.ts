@@ -15,7 +15,7 @@ import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Injectable()
 export class AuthService {
-  private readonly ACCESS_TOKEN_EXPIRES_SECONDS = 60 * 15;
+  private readonly ACCESS_TOKEN_EXPIRES_SECONDS = 10;
   private readonly REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 
   constructor(
@@ -91,6 +91,9 @@ export class AuthService {
 
   public async refresh(sessionId: string, oldRefreshToken: string) {
     const session = await this.sessionsService.findById(sessionId);
+    if (!session) {
+      throw new UnauthorizedException();
+    }
 
     const refreshTokenMathes = await this.utilsService.compareHash(
       oldRefreshToken,

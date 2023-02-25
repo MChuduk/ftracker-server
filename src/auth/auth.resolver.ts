@@ -44,6 +44,7 @@ export class AuthResolver {
     return session;
   }
 
+  @Public()
   @Mutation(() => SessionType)
   public async refresh(
     @Context('req') req: Request,
