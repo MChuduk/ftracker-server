@@ -15,7 +15,7 @@ import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Injectable()
 export class AuthService {
-  private readonly ACCESS_TOKEN_EXPIRES_SECONDS = 10;
+  private readonly ACCESS_TOKEN_EXPIRES_SECONDS = 60 * 15;
   private readonly REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 
   constructor(
