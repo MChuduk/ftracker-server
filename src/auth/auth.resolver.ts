@@ -1,9 +1,11 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Request, Response } from 'express';
 import { SessionType } from 'src/sessions/types';
 import { UserType } from 'src/users/types';
 import { AuthService } from './auth.service';
 import { Public, SessionId } from './decorators';
+import { JwtRefreshGuard } from './guards';
 import { SignInLocalInput, SignUpLocalInput } from './types-input';
 
 @Resolver()
@@ -46,6 +48,7 @@ export class AuthResolver {
   }
 
   @Public()
+  @UseGuards(JwtRefreshGuard)
   @Mutation(() => SessionType)
   public async refresh(
     @Context('req') req: Request,
