@@ -15,7 +15,7 @@ type SessionType {
   refreshToken: String!
 }
 
-type WalletType {
+type WalletDto {
   id: ID!
   name: String!
   user: UserType!
@@ -24,6 +24,11 @@ type WalletType {
 type Query {
   currentUser: UserType!
   test: String!
+  getAllWallets(input: GetAllWalletsDto!): [WalletDto!]!
+}
+
+input GetAllWalletsDto {
+  userId: String!
 }
 
 type Mutation {
@@ -31,7 +36,7 @@ type Mutation {
   signInLocal(credentials: SignInLocalInput!): SessionType!
   logout: SessionType!
   refresh: SessionType!
-  createWallet(input: CreateWalletInput!): WalletType!
+  createWallet(input: CreateWalletDto!): WalletDto!
 }
 
 input SignUpLocalInput {
@@ -45,7 +50,7 @@ input SignInLocalInput {
   password: String!
 }
 
-input CreateWalletInput {
+input CreateWalletDto {
   name: String!
   userId: ID!
 }

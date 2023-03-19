@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
+import { CreateWalletDto, WalletDto } from './dto';
 import { WalletEntity } from './entities';
-import { CreateWalletInput } from './types-input';
 
 @Injectable()
 export class WalletsService {
@@ -13,7 +13,15 @@ export class WalletsService {
     private readonly usersService: UsersService,
   ) {}
 
-  public async create(input: CreateWalletInput): Promise<WalletEntity> {
+  public async getAll(userId: string): Promise<WalletEntity[]> {
+    return await this.walletsRepository
+      .createQueryBuilder('wallet')
+      .leftJoinAndSelect('wallet.user', 'user')
+      .where('wallet.user.id = :userId', { userId })
+      .getMany();
+  }
+
+  public async create(input: CreateWalletDto): Promise<WalletEntity> {
     const { userId } = input;
     const user = await this.usersService.findById(userId);
 

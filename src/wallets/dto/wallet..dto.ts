@@ -2,7 +2,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserType } from 'src/users/types';
 
 @ObjectType()
-export class WalletType {
+export class WalletDto {
   @Field(() => ID)
   id: string;
 

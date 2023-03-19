@@ -2,7 +2,7 @@ import { Field, ID, InputType } from '@nestjs/graphql';
 import { IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
-export class CreateWalletInput {
+export class CreateWalletDto {
   @Field()
   @IsString()
   @MinLength(3)
