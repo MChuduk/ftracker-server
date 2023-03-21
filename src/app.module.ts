@@ -9,6 +9,7 @@ import { join } from 'path';
 import { ApolloDriver } from '@nestjs/apollo';
 import { dataSourceOptions } from './config/database.config';
 import { WalletsModule } from './wallets/wallets.module';
+import { CurrencyModule } from './currency/currency.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WalletsModule } from './wallets/wallets.module';
     TypeOrmModule.forRoot(dataSourceOptions),
     AuthModule,
     WalletsModule,
+    CurrencyModule,
   ],
   providers: [
     {
