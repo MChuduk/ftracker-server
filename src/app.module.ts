@@ -8,6 +8,7 @@ import { JwtAccessGuard } from './auth/guards';
 import { join } from 'path';
 import { ApolloDriver } from '@nestjs/apollo';
 import { dataSourceOptions } from './config/database.config';
+import { WalletsModule } from './wallets/wallets.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { dataSourceOptions } from './config/database.config';
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     AuthModule,
+    WalletsModule,
   ],
   providers: [
     {
