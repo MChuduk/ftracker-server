@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { CurrencyType } from '../enum';
+import { CurrencyType } from '../model';
 
 @Entity({ name: 'currency' })
 export class CurrencyEntity {
@@ -9,17 +9,17 @@ export class CurrencyEntity {
   @Column({
     type: 'enum',
     enum: CurrencyType,
-    default: CurrencyType.BYN,
-    unique: true,
   })
   type: CurrencyType;
 
-  @Column({ name: 'BYN' })
-  BYN: number;
+  @Column()
+  name: string;
 
-  @Column({ name: 'USD' })
-  USD: number;
+  @Column()
+  color: string;
 
-  @Column({ name: 'EUR' })
-  EUR: number;
+  @Column({
+    type: 'decimal',
+  })
+  rate: number;
 }
