@@ -14,8 +14,9 @@ export class CurrencyService implements OnModuleInit {
     private readonly currencyRepository: Repository<CurrencyEntity>,
   ) {}
 
-  onModuleInit() {
-    this.fetchCurrency();
+  async onModuleInit() {
+    await this.addDefaultCurrency();
+    await this.fetchCurrency();
   }
 
   public async create(currency: Currency): Promise<void> {
@@ -25,6 +26,10 @@ export class CurrencyService implements OnModuleInit {
       .into(CurrencyEntity)
       .values(currency)
       .execute();
+  }
+
+  public async getAll(): Promise<Currency[]> {
+    return await this.currencyRepository.createQueryBuilder().getMany();
   }
 
   public async updateCurrencyRate(id: string, rate: number) {
@@ -42,6 +47,15 @@ export class CurrencyService implements OnModuleInit {
       .where('currency.type = :type', { type });
 
     return query.getOne();
+  }
+
+  private async addDefaultCurrency() {
+    await this.upsertCurrency({
+      type: CurrencyType.BYN,
+      name: 'Белорусский рубль',
+      rate: 1,
+      color: '',
+    });
   }
 
   @Cron(CronExpression.EVERY_HOUR)

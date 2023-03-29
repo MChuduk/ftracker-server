@@ -15,16 +15,32 @@ type SessionType {
   refreshToken: String!
 }
 
+type CurrencyDto {
+  id: ID!
+  type: CurrencyType!
+  name: String!
+  color: String!
+  rate: Float!
+}
+
+enum CurrencyType {
+  BYN
+  USD
+  EUR
+}
+
 type WalletDto {
   id: ID!
   name: String!
   user: UserType!
+  currency: CurrencyDto!
 }
 
 type Query {
   currentUser: UserType!
   test: String!
   getAllWallets(input: GetAllWalletsDto!): [WalletDto!]!
+  getAllCurrency: [CurrencyDto!]!
 }
 
 input GetAllWalletsDto {
