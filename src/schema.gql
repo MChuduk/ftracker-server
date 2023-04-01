@@ -15,16 +15,32 @@ type SessionType {
   refreshToken: String!
 }
 
+type CurrencyDto {
+  id: ID!
+  type: CurrencyType!
+  name: String!
+  color: String!
+  rate: Float!
+}
+
+enum CurrencyType {
+  BYN
+  USD
+  EUR
+}
+
 type WalletDto {
   id: ID!
   name: String!
   user: UserType!
+  currency: CurrencyDto!
 }
 
 type Query {
   currentUser: UserType!
   test: String!
   getAllWallets(input: GetAllWalletsDto!): [WalletDto!]!
+  getAllCurrency: [CurrencyDto!]!
 }
 
 input GetAllWalletsDto {
@@ -36,7 +52,7 @@ type Mutation {
   signInLocal(credentials: SignInLocalInput!): SessionType!
   logout: SessionType!
   refresh: SessionType!
-  createWallet(input: CreateWalletDto!): WalletDto!
+  createWallet(input: CreateWalletRequestDto!): WalletDto!
 }
 
 input SignUpLocalInput {
@@ -50,7 +66,8 @@ input SignInLocalInput {
   password: String!
 }
 
-input CreateWalletDto {
+input CreateWalletRequestDto {
   name: String!
   userId: ID!
+  currencyId: ID!
 }

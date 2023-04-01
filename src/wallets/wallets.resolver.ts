@@ -1,5 +1,5 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CreateWalletDto, GetAllWalletsDto, WalletDto } from './dto';
+import { CreateWalletRequestDto, GetAllWalletsDto, WalletDto } from './dto';
 import { WalletsService } from './wallets.service';
 
 @Resolver()
@@ -12,7 +12,7 @@ export class WalletsResolver {
   }
 
   @Mutation(() => WalletDto)
-  public async createWallet(@Args('input') input: CreateWalletDto) {
+  public async createWallet(@Args('input') input: CreateWalletRequestDto) {
     return await this.walletsService.create(input);
   }
 }

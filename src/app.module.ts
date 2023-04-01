@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -9,6 +9,8 @@ import { join } from 'path';
 import { ApolloDriver } from '@nestjs/apollo';
 import { dataSourceOptions } from './config/database.config';
 import { WalletsModule } from './wallets/wallets.module';
+import { CurrencyModule } from './currency/currency.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -22,12 +24,14 @@ import { WalletsModule } from './wallets/wallets.module';
       useGlobalPrefix: true,
       context: ({ req, res }) => ({ req, res }),
     }),
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     AuthModule,
     WalletsModule,
+    CurrencyModule,
   ],
   providers: [
     {
