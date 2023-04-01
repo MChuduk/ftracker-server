@@ -49,6 +49,13 @@ export class CurrencyService implements OnModuleInit {
     return query.getOne();
   }
 
+  public async findById(id: string): Promise<CurrencyEntity> {
+    return await this.currencyRepository
+      .createQueryBuilder('currency')
+      .where('currency.id = :id', { id })
+      .getOne();
+  }
+
   private async addDefaultCurrency() {
     await this.upsertCurrency({
       type: CurrencyType.BYN,
