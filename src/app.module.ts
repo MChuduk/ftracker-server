@@ -11,6 +11,7 @@ import { dataSourceOptions } from './config/database.config';
 import { WalletsModule } from './wallets/wallets.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuthModule,
     WalletsModule,
     CurrencyModule,
+    TransactionsModule,
   ],
   providers: [
     {

@@ -36,10 +36,25 @@ type WalletDto {
   currency: CurrencyDto!
 }
 
+type TransactionDto {
+  id: String!
+  amount: Float!
+  description: String!
+  date: DateTime!
+  user: UserDto!
+  wallet: WalletDto!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Query {
   currentUser: UserDto!
   wallets: [WalletDto!]!
   currency: [CurrencyDto!]!
+  transactions: [TransactionDto!]!
 }
 
 type Mutation {
@@ -49,6 +64,7 @@ type Mutation {
   refresh: SessionDto!
   createWallet(request: WalletCreateRequestDto!): WalletDto!
   deleteWallet(request: WalletDeleteRequestDto!): WalletDto!
+  createTransaction(request: TransactionCreateRequestDto!): TransactionDto!
 }
 
 input SignUpRequestDto {
@@ -68,5 +84,12 @@ input WalletCreateRequestDto {
 }
 
 input WalletDeleteRequestDto {
+  walletId: ID!
+}
+
+input TransactionCreateRequestDto {
+  amount: Float!
+  description: String!
+  date: DateTime!
   walletId: ID!
 }

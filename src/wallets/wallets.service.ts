@@ -9,7 +9,6 @@ import {
 } from './dto';
 import { WalletEntity } from './entities';
 import { CurrencyService } from '../currency/currency.service';
-import { UserEntity } from '../users/entities';
 
 @Injectable()
 export class WalletsService {
