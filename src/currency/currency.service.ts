@@ -41,7 +41,7 @@ export class CurrencyService implements OnModuleInit {
       .execute();
   }
 
-  public async findByType(type: string): Promise<CurrencyEntity> {
+  public async findByType(type: string): Promise<Currency> {
     const query = await this.currencyRepository
       .createQueryBuilder('currency')
       .where('currency.type = :type', { type });
@@ -49,7 +49,7 @@ export class CurrencyService implements OnModuleInit {
     return query.getOne();
   }
 
-  public async findById(id: string): Promise<CurrencyEntity> {
+  public async findById(id: string): Promise<Currency> {
     return await this.currencyRepository
       .createQueryBuilder('currency')
       .where('currency.id = :id', { id })

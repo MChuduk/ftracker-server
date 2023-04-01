@@ -15,13 +15,6 @@ type SessionDto {
   user: UserDto!
 }
 
-type UserType {
-  id: ID!
-  displayName: String!
-  email: String!
-  password: String!
-}
-
 type CurrencyDto {
   id: ID!
   type: CurrencyType!
@@ -39,18 +32,14 @@ enum CurrencyType {
 type WalletDto {
   id: ID!
   name: String!
-  user: UserType!
+  user: UserDto!
   currency: CurrencyDto!
 }
 
 type Query {
   currentUser: UserDto!
-  getAllWallets(input: GetAllWalletsDto!): [WalletDto!]!
-  getAllCurrency: [CurrencyDto!]!
-}
-
-input GetAllWalletsDto {
-  userId: String!
+  wallets: [WalletDto!]!
+  currency: [CurrencyDto!]!
 }
 
 type Mutation {
@@ -58,7 +47,8 @@ type Mutation {
   signIn(request: SignInRequestDto!): SessionDto!
   logout: SessionDto!
   refresh: SessionDto!
-  createWallet(input: CreateWalletRequestDto!): WalletDto!
+  createWallet(request: WalletCreateRequestDto!): WalletDto!
+  deleteWallet(request: WalletDeleteRequestDto!): WalletDto!
 }
 
 input SignUpRequestDto {
@@ -72,8 +62,11 @@ input SignInRequestDto {
   password: String!
 }
 
-input CreateWalletRequestDto {
+input WalletCreateRequestDto {
   name: String!
-  userId: ID!
   currencyId: ID!
+}
+
+input WalletDeleteRequestDto {
+  walletId: ID!
 }

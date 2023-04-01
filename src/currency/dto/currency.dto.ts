@@ -8,15 +8,15 @@ registerEnumType(CurrencyType, {
 @ObjectType()
 export class CurrencyDto implements Currency {
   @Field(() => ID)
-  id: string;
+  readonly id?: string;
   @Field(() => CurrencyType)
-  type: CurrencyType;
+  readonly type: CurrencyType;
 
   @Field()
-  name: string;
+  readonly name: string;
 
   @Field()
-  color: string;
+  readonly color: string;
   @Field()
-  rate: number;
+  readonly rate: number;
 }

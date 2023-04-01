@@ -1,3 +1,3 @@
-export * from './create-wallet-request.dto';
-export * from './get-all-wallets.dto';
+export * from './wallet-create-request.dto';
+export * from './wallet-delete-request.dto';
 export * from './wallet.dto';

@@ -1,7 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Request, Response } from 'express';
-import { UserType } from 'src/users/types';
 import { AuthService } from './auth.service';
 import { Public, SessionId } from './decorators';
 import { JwtRefreshGuard } from './guards';
