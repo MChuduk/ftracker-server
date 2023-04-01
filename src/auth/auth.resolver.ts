@@ -1,32 +1,35 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Request, Response } from 'express';
-import { SessionType } from 'src/sessions/types';
 import { UserType } from 'src/users/types';
 import { AuthService } from './auth.service';
 import { Public, SessionId } from './decorators';
 import { JwtRefreshGuard } from './guards';
-import { SignInLocalInput, SignUpLocalInput } from './types-input';
+import { UserDto } from '../users/dto';
+import { SignInRequestDto, SignUpRequestDto } from './dto';
+import { SessionDto } from '../sessions/dto';
 
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @Mutation(() => UserType)
-  public async signUpLocal(@Args('credentials') credentials: SignUpLocalInput) {
-    return await this.authService.signUpLocal(credentials);
+  @Mutation(() => UserDto, { name: 'signUp' })
+  public async signUp(
+    @Args('request') request: SignUpRequestDto,
+  ): Promise<UserDto> {
+    return await this.authService.signUp(request);
   }
 
   @Public()
-  @Mutation(() => SessionType)
-  public async signInLocal(
+  @Mutation(() => SessionDto, { name: 'signIn' })
+  public async signIn(
     @Context('res') res: Response,
     @SessionId() sessionId: string,
-    @Args('credentials') credentials: SignInLocalInput,
-  ) {
+    @Args('request') request: SignInRequestDto,
+  ): Promise<SessionDto> {
     const { session, accessCookie, refreshCookie } =
-      await this.authService.signInLocal(sessionId, credentials);
+      await this.authService.signIn(sessionId, request);
 
     res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
 
@@ -34,11 +37,11 @@ export class AuthResolver {
   }
 
   @Public()
-  @Mutation(() => SessionType)
+  @Mutation(() => SessionDto, { name: 'logout' })
   public async logout(
     @Context('res') res: Response,
     @SessionId() sessionId: string,
-  ) {
+  ): Promise<SessionDto> {
     const { session, accessCookie, refreshCookie } =
       await this.authService.logout(sessionId);
 
@@ -49,12 +52,12 @@ export class AuthResolver {
 
   @Public()
   @UseGuards(JwtRefreshGuard)
-  @Mutation(() => SessionType)
+  @Mutation(() => SessionDto, { name: 'refresh' })
   public async refresh(
     @Context('req') req: Request,
     @Context('res') res: Response,
     @SessionId() sessionId: string,
-  ) {
+  ): Promise<SessionDto> {
     const oldRefreshToken = req?.cookies?.Refresh;
     const { session, accessCookie, refreshCookie } =
       await this.authService.refresh(sessionId, oldRefreshToken);
@@ -64,14 +67,8 @@ export class AuthResolver {
     return session;
   }
 
-  @Query(() => UserType)
-  public async currentUser(@SessionId() sessionId: string) {
+  @Query(() => UserDto, { name: 'currentUser' })
+  public async currentUser(@SessionId() sessionId: string): Promise<UserDto> {
     return await this.authService.getCurrentUser(sessionId);
-  }
-
-  @Public()
-  @Query(() => String)
-  public async test() {
-    return `user`;
   }
 }

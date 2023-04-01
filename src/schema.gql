@@ -2,17 +2,24 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type UserType {
+type UserDto {
   id: ID!
   displayName: String!
   email: String!
   password: String!
 }
 
-type SessionType {
+type SessionDto {
   id: ID!
-  user: UserType!
   refreshToken: String!
+  user: UserDto!
+}
+
+type UserType {
+  id: ID!
+  displayName: String!
+  email: String!
+  password: String!
 }
 
 type CurrencyDto {
@@ -37,8 +44,7 @@ type WalletDto {
 }
 
 type Query {
-  currentUser: UserType!
-  test: String!
+  currentUser: UserDto!
   getAllWallets(input: GetAllWalletsDto!): [WalletDto!]!
   getAllCurrency: [CurrencyDto!]!
 }
@@ -48,20 +54,20 @@ input GetAllWalletsDto {
 }
 
 type Mutation {
-  signUpLocal(credentials: SignUpLocalInput!): UserType!
-  signInLocal(credentials: SignInLocalInput!): SessionType!
-  logout: SessionType!
-  refresh: SessionType!
+  signUp(request: SignUpRequestDto!): UserDto!
+  signIn(request: SignInRequestDto!): SessionDto!
+  logout: SessionDto!
+  refresh: SessionDto!
   createWallet(input: CreateWalletRequestDto!): WalletDto!
 }
 
-input SignUpLocalInput {
+input SignUpRequestDto {
   displayName: String!
   email: String!
   password: String!
 }
 
-input SignInLocalInput {
+input SignInRequestDto {
   email: String!
   password: String!
 }

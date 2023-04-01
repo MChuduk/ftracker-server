@@ -15,8 +15,8 @@ export class CurrencyService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.addDefaultCurrency();
-    await this.fetchCurrency();
+    //await this.addDefaultCurrency();
+    //await this.fetchCurrency();
   }
 
   public async create(currency: Currency): Promise<void> {

@@ -6,12 +6,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { SessionsService } from 'src/sessions/sessions.service';
-import { UserEntity } from 'src/users/entities';
 import { UsersService } from 'src/users/users.service';
 import { UtilsService } from 'src/utils/utils.service';
-import AccessTokenPayload from './interfaces/access-token-payload.interface';
-import RefreshTokenPayload from './interfaces/refresh-token-payload.interface';
-import { SignInLocalInput, SignUpLocalInput } from './types-input';
+import AccessTokenPayload from './model/access-token-payload';
+import RefreshTokenPayload from './model/refresh-token-payload';
+import { SignInRequestDto, SignUpRequestDto } from './dto';
+import { User } from '../users/model';
+import { LogoutResponse, RefreshResponse, SignInResponse } from './model';
 
 @Injectable()
 export class AuthService {
@@ -26,33 +27,33 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async signUpLocal(credentials: SignUpLocalInput): Promise<UserEntity> {
-    if (await this.usersService.findByEmail(credentials.email)) {
+  public async signUp(request: SignUpRequestDto): Promise<User> {
+    if (await this.usersService.findByEmail(request.email)) {
       throw new BadRequestException(
-        `user with email ${credentials.email} already exists`,
+        `user with email ${request.email} already exists`,
       );
     }
-    const passwordHashed = await this.utilsService.hashString(
-      credentials.password,
-    );
-    const user = await this.usersService.create({
-      displayName: credentials.displayName,
-      email: credentials.email,
+    const passwordHashed = await this.utilsService.hashString(request.password);
+    return await this.usersService.create({
+      displayName: request.displayName,
+      email: request.email,
       password: passwordHashed,
     });
-    return user;
   }
 
-  public async signInLocal(sessionId: string, credentials: SignInLocalInput) {
+  public async signIn(
+    sessionId: string,
+    request: SignInRequestDto,
+  ): Promise<SignInResponse> {
     if (sessionId) {
       await this.sessionsService.delete(sessionId);
     }
-    const user = await this.usersService.findByEmail(credentials.email);
+    const user = await this.usersService.findByEmail(request.email);
     if (!user) {
       throw new BadRequestException('wrong credentials');
     }
     const passwordMatches = await this.utilsService.compareHash(
-      credentials.password,
+      request.password,
       user.password,
     );
     if (!passwordMatches) {
@@ -76,7 +77,7 @@ export class AuthService {
     return { session, accessCookie, refreshCookie };
   }
 
-  public async logout(sessionId: string) {
+  public async logout(sessionId: string): Promise<LogoutResponse> {
     const session = await this.sessionsService.findById(sessionId);
     if (session) {
       await this.sessionsService.delete(sessionId);
@@ -89,17 +90,20 @@ export class AuthService {
     return { session, accessCookie, refreshCookie };
   }
 
-  public async refresh(sessionId: string, oldRefreshToken: string) {
+  public async refresh(
+    sessionId: string,
+    oldRefreshToken: string,
+  ): Promise<RefreshResponse> {
     const session = await this.sessionsService.findById(sessionId);
     if (!session) {
       throw new UnauthorizedException();
     }
 
-    const refreshTokenMathes = await this.utilsService.compareHash(
+    const refreshTokenMatches = await this.utilsService.compareHash(
       oldRefreshToken,
       session.refreshToken,
     );
-    if (!refreshTokenMathes) {
+    if (!refreshTokenMatches) {
       throw new UnauthorizedException();
     }
 
@@ -121,9 +125,9 @@ export class AuthService {
     return { session, accessCookie, refreshCookie };
   }
 
-  public async getCurrentUser(sessionId: string): Promise<UserEntity> {
+  public async getCurrentUser(sessionId: string): Promise<User> {
     const session = await this.sessionsService.findById(sessionId);
-    return await session?.user;
+    return session?.user;
   }
 
   private async generateAccessToken(
