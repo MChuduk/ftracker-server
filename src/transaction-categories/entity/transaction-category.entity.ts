@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { UserSettingsEntity } from '../../users/entities';
+import { UserEntity } from '../../users/entities';
 import { BaseEntity } from '../../common/entity';
 
 @Entity('transaction_categories')
@@ -22,20 +22,19 @@ export class TransactionCategoryEntity extends BaseEntity {
 
   @Column({
     name: 'svg_path',
-    length: 255,
     nullable: false,
   })
   svgPath: string;
 
   @Column({
-    name: 'user_settings_id',
+    name: 'user_id',
     type: 'uuid',
     unique: true,
     nullable: true,
   })
-  userSettingsId: string;
+  userId: string;
 
-  @ManyToOne(() => UserSettingsEntity, { nullable: true })
-  @JoinColumn({ name: 'user_settings_id' })
-  userSettings: UserSettingsEntity;
+  @ManyToOne(() => UserEntity, { nullable: true })
+  @JoinColumn({ name: 'user_id' })
+  user: UserEntity;
 }

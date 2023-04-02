@@ -34,7 +34,7 @@ export class WalletsService {
   ): Promise<WalletDto> {
     const { currencyId } = request;
     const user = await this.usersService.getById(userId);
-    const currency = await this.currencyService.findById(currencyId);
+    const currency = await this.currencyService.getById(currencyId);
 
     if (!user) {
       throw new NotFoundException(`user with id ${userId} not found`);

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity, UserSettingsEntity } from './entities';
 import { User, UserSettings } from './model';
 import { UserDto } from './dto';
 import { UserSettingsDto } from './dto/user-settings.dto';
+import { TransactionCategoriesService } from '../transaction-categories/transaction.categories.service';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +14,8 @@ export class UsersService {
     private readonly userSettingsRepository: Repository<UserSettingsEntity>,
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
+    @Inject(forwardRef(() => TransactionCategoriesService))
+    private readonly transactionCategoriesService: TransactionCategoriesService,
   ) {}
 
   public async create(user: UserDto): Promise<User> {
@@ -45,6 +48,17 @@ export class UsersService {
       .createQueryBuilder('settings')
       .where('settings.id = :id', { id })
       .getOne();
+  }
+
+  public async addDefaultCategories(userId: string): Promise<void> {
+    const categories =
+      await this.transactionCategoriesService.getDefaultTransactionCategories();
+    for (const category of categories) {
+      await this.transactionCategoriesService.addCategoryToUser(
+        userId,
+        category.id,
+      );
+    }
   }
 
   private async createSettings(

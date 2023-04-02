@@ -34,11 +34,13 @@ export class AuthService {
       );
     }
     const passwordHashed = await this.utilsService.hashString(request.password);
-    return await this.usersService.create({
+    const user = await this.usersService.create({
       displayName: request.displayName,
       email: request.email,
       password: passwordHashed,
     });
+    await this.usersService.addDefaultCategories(user.id);
+    return user;
   }
 
   public async signIn(

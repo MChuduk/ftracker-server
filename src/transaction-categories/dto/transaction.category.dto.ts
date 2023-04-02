@@ -8,5 +8,7 @@ export class TransactionCategoryDto implements TransactionCategory {
   @Field()
   readonly name: string;
   @Field()
+  readonly color: string;
+  @Field()
   readonly svgPath: string;
 }
