@@ -6,9 +6,11 @@ import {
 } from '@nestjs/common';
 import { TransactionCategory } from './model';
 import { Repository } from 'typeorm';
-import { TransactionCategoryEntity } from './entity';
+import {
+  TransactionCategoryEntity,
+  UserTransactionCategoriesEntity,
+} from './entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserTransactionCategoriesEntity } from '../users/entities';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -38,6 +40,20 @@ export class TransactionCategoriesService {
       .createQueryBuilder('category')
       .where('category.id = :transactionCategoryId', { transactionCategoryId })
       .execute();
+  }
+
+  public async getUserCategories(
+    userId: string,
+  ): Promise<TransactionCategory[]> {
+    const userCategories = await this.userTransactionCategoriesRepository
+      .createQueryBuilder('userCategory')
+      .leftJoinAndSelect(
+        'userCategory.transactionCategory',
+        'transactionCategory',
+      )
+      .where('userCategory.user_id = :userId', { userId })
+      .getMany();
+    return userCategories.map((category) => category.transactionCategory);
   }
 
   public async addCategoryToUser(

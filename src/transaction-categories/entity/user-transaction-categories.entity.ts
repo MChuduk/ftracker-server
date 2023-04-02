@@ -1,7 +1,7 @@
 import { BaseEntity } from '../../common/entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { UserEntity } from './user.entity';
-import { TransactionCategoryEntity } from '../../transaction-categories/entity';
+import { UserEntity } from '../../users/entities';
+import { TransactionCategoryEntity } from './index';
 
 @Entity('user_transaction_categories')
 export class UserTransactionCategoriesEntity extends BaseEntity {

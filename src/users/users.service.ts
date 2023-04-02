@@ -50,6 +50,8 @@ export class UsersService {
       .getOne();
   }
 
+  public async
+
   public async addDefaultCategories(userId: string): Promise<void> {
     const categories =
       await this.transactionCategoriesService.getDefaultTransactionCategories();

@@ -35,8 +35,10 @@ export class TransactionsService {
     if (!user) throw new NotFoundException('user not found');
     if (!wallet) throw new NotFoundException('wallet not found');
 
-    const transaction = this.transactionsRepository.create({ ...request });
-    //transaction.user = user;
+    const transaction = this.transactionsRepository.create({
+      ...request,
+      userId,
+    });
     transaction.wallet = wallet;
 
     const { raw } = await this.transactionsRepository

@@ -61,6 +61,7 @@ scalar DateTime
 type Query {
   currentUser: UserDto!
   defaultTransactionCategories: [TransactionCategoryDto!]!
+  transactionCategories: [TransactionCategoryDto!]!
   wallets: [WalletDto!]!
   currency: [CurrencyDto!]!
   transactions: [TransactionDto!]!
