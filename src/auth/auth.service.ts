@@ -28,7 +28,7 @@ export class AuthService {
   ) {}
 
   public async signUp(request: SignUpRequestDto): Promise<User> {
-    if (await this.usersService.findByEmail(request.email)) {
+    if (await this.usersService.getByEmail(request.email)) {
       throw new BadRequestException(
         `user with email ${request.email} already exists`,
       );
@@ -48,7 +48,7 @@ export class AuthService {
     if (sessionId) {
       await this.sessionsService.delete(sessionId);
     }
-    const user = await this.usersService.findByEmail(request.email);
+    const user = await this.usersService.getByEmail(request.email);
     if (!user) {
       throw new BadRequestException('wrong credentials');
     }
@@ -108,7 +108,7 @@ export class AuthService {
     }
 
     const accessToken = await this.generateAccessToken({
-      userId: session.user.id,
+      userId: session.userId,
     });
     const refreshToken = await this.generateRefreshToken({
       sessionId: session.id,
@@ -127,7 +127,7 @@ export class AuthService {
 
   public async getCurrentUser(sessionId: string): Promise<User> {
     const session = await this.sessionsService.findById(sessionId);
-    return session?.user;
+    return await this.usersService.getById(session.userId);
   }
 
   private async generateAccessToken(

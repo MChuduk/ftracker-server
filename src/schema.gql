@@ -7,12 +7,20 @@ type UserDto {
   displayName: String!
   email: String!
   password: String!
+  settingsId: String!
 }
 
 type SessionDto {
   id: ID!
   refreshToken: String!
-  user: UserDto!
+  userId: ID!
+}
+
+type WalletDto {
+  id: ID!
+  name: String!
+  userId: ID!
+  currencyId: ID!
 }
 
 type CurrencyDto {
@@ -29,20 +37,13 @@ enum CurrencyType {
   EUR
 }
 
-type WalletDto {
-  id: ID!
-  name: String!
-  user: UserDto!
-  currency: CurrencyDto!
-}
-
 type TransactionDto {
   id: String!
   amount: Float!
   description: String!
   date: DateTime!
-  user: UserDto!
-  wallet: WalletDto!
+  userId: String!
+  walletId: String!
 }
 
 """
@@ -50,11 +51,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type TransactionCategoryDto {
+  id: ID!
+  name: String!
+  svgPath: String!
+}
+
 type Query {
   currentUser: UserDto!
   wallets: [WalletDto!]!
   currency: [CurrencyDto!]!
   transactions: [TransactionDto!]!
+  defaultTransactionCategories: [TransactionCategoryDto!]!
 }
 
 type Mutation {

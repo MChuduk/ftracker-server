@@ -4,6 +4,7 @@ import { UserEntity } from 'src/users/entities';
 import { Repository } from 'typeorm';
 import { SessionEntity } from './entities';
 import { Session } from './model';
+import {User} from "../users/model";
 
 @Injectable()
 export class SessionsService {
@@ -12,7 +13,7 @@ export class SessionsService {
     private readonly sessionsRepository: Repository<SessionEntity>,
   ) {}
 
-  public async create(user: UserEntity): Promise<Session> {
+  public async create(user: User): Promise<Session> {
     const session = this.sessionsRepository.create({ user });
 
     await this.sessionsRepository

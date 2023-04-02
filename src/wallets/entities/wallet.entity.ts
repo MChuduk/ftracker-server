@@ -1,18 +1,36 @@
 import { UserEntity } from 'src/users/entities';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CurrencyEntity } from '../../currency/entity';
+import { BaseEntity } from '../../common/entity';
 
 @Entity('wallets')
-export class WalletEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id?: string;
-
-  @Column()
+export class WalletEntity extends BaseEntity {
+  @Column({
+    name: 'name',
+    type: 'varchar',
+    length: 255,
+  })
   name: string;
 
-  @ManyToOne(() => UserEntity)
+  @Column({
+    name: 'user_id',
+    type: 'uuid',
+    nullable: false,
+  })
+  userId: string;
+
+  @Column({
+    name: 'currency_id',
+    type: 'uuid',
+    nullable: false,
+  })
+  currencyId: string;
+
+  @ManyToOne(() => UserEntity, { nullable: false })
+  @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
   @ManyToOne(() => CurrencyEntity, { nullable: false })
+  @JoinColumn({ name: 'currency_id' })
   currency: CurrencyEntity;
 }

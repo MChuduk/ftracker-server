@@ -11,4 +11,6 @@ export class UserDto implements User {
   readonly email: string;
   @Field()
   readonly password: string;
+  @Field()
+  readonly settingsId?: string;
 }

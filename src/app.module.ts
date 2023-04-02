@@ -12,6 +12,7 @@ import { WalletsModule } from './wallets/wallets.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TransactionsModule } from './transactions/transactions.module';
+import { TransactionCategoriesModule } from './transaction-categories/transaction-categories.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     WalletsModule,
     CurrencyModule,
     TransactionsModule,
+    TransactionCategoriesModule,
   ],
   providers: [
     {

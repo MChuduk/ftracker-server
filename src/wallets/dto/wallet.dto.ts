@@ -1,7 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { CurrencyDto } from '../../currency/dto';
 import { Wallet } from '../model';
-import { UserDto } from '../../users/dto';
 
 @ObjectType()
 export class WalletDto implements Wallet {
@@ -11,9 +9,9 @@ export class WalletDto implements Wallet {
   @Field()
   readonly name: string;
 
-  @Field()
-  readonly user: UserDto;
+  @Field(() => ID)
+  readonly userId: string;
 
-  @Field()
-  readonly currency: CurrencyDto;
+  @Field(() => ID)
+  readonly currencyId: string;
 }

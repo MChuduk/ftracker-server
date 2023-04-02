@@ -33,7 +33,7 @@ export class WalletsService {
     request: WalletCreateRequestDto,
   ): Promise<WalletDto> {
     const { currencyId } = request;
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.getById(userId);
     const currency = await this.currencyService.findById(currencyId);
 
     if (!user) {

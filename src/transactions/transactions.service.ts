@@ -30,13 +30,13 @@ export class TransactionsService {
     userId: string,
     request: TransactionCreateRequestDto,
   ): Promise<Transaction> {
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.getById(userId);
     const wallet = await this.walletService.findById(request.walletId);
     if (!user) throw new NotFoundException('user not found');
     if (!wallet) throw new NotFoundException('wallet not found');
 
     const transaction = this.transactionsRepository.create({ ...request });
-    transaction.user = user;
+    //transaction.user = user;
     transaction.wallet = wallet;
 
     const { raw } = await this.transactionsRepository

@@ -1,38 +1,61 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from './entities';
-import { User } from './model';
+import { UserEntity, UserSettingsEntity } from './entities';
+import { User, UserSettings } from './model';
+import { UserDto } from './dto';
+import { UserSettingsDto } from './dto/user-settings.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
+    @InjectRepository(UserSettingsEntity)
+    private readonly userSettingsRepository: Repository<UserSettingsEntity>,
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  public async create(user: UserEntity): Promise<User> {
-    await this.usersRepository
+  public async create(user: UserDto): Promise<User> {
+    const settings = await this.createSettings({});
+    const { raw } = await this.usersRepository
       .createQueryBuilder()
       .insert()
       .into(UserEntity)
-      .values(user)
+      .values({ ...user, settings })
       .execute();
-
-    return await this.findByEmail(user.email);
+    return await this.getById(raw[0].id);
   }
 
-  public async findById(userId: string): Promise<User> {
+  public async getById(userId: string): Promise<User> {
     return await this.usersRepository
       .createQueryBuilder('user')
       .where('user.id = :userId', { userId })
       .getOne();
   }
 
-  public async findByEmail(email: string): Promise<User> {
+  public async getByEmail(email: string): Promise<User> {
     return await this.usersRepository
       .createQueryBuilder('user')
       .where('user.email = :email', { email })
       .getOne();
+  }
+
+  public async getSettingsById(id: string): Promise<UserSettings> {
+    return await this.userSettingsRepository
+      .createQueryBuilder('settings')
+      .where('settings.id = :id', { id })
+      .getOne();
+  }
+
+  private async createSettings(
+    settings: UserSettingsDto,
+  ): Promise<UserSettings> {
+    const { raw } = await this.userSettingsRepository
+      .createQueryBuilder()
+      .insert()
+      .into(UserSettingsEntity)
+      .values(settings)
+      .execute();
+    return await this.getSettingsById(raw[0].id);
   }
 }

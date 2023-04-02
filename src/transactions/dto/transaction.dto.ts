@@ -1,6 +1,4 @@
 import { Transaction } from '../model';
-import { UserDto } from '../../users/dto';
-import { WalletDto } from '../../wallets/dto';
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
@@ -14,7 +12,7 @@ export class TransactionDto implements Transaction {
   @Field()
   readonly date: Date;
   @Field()
-  readonly user: UserDto;
+  readonly userId: string;
   @Field()
-  readonly wallet: WalletDto;
+  readonly walletId: string;
 }
