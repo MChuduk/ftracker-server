@@ -1,18 +1,17 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { UserType } from 'src/users/types';
-import { CurrencyDto } from '../../currency/dto';
+import { Wallet } from '../model';
 
 @ObjectType()
-export class WalletDto {
+export class WalletDto implements Wallet {
   @Field(() => ID)
-  id: string;
+  readonly id?: string;
 
   @Field()
-  name: string;
+  readonly name: string;
 
-  @Field()
-  user: UserType;
+  @Field(() => ID)
+  readonly userId: string;
 
-  @Field()
-  currency: CurrencyDto;
+  @Field(() => ID)
+  readonly currencyId: string;
 }

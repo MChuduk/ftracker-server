@@ -15,6 +15,7 @@ export const dataSourceOptions: DataSourceOptions = {
   database: configService.get<string>('POSTGRES_NAME'),
   entities: ['dist/**/*.entity.js'],
   migrations: ['dist/migrations/*.js'],
+  logging: false,
 };
 
 const dataSource = new DataSource(dataSourceOptions);

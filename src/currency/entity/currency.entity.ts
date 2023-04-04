@@ -1,24 +1,35 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { CurrencyType } from '../model';
+import { BaseEntity } from '../../common/entity';
 
 @Entity({ name: 'currency' })
-export class CurrencyEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class CurrencyEntity extends BaseEntity {
   @Column({
+    enumName: 'type',
     type: 'enum',
     enum: CurrencyType,
+    nullable: false,
   })
   type: CurrencyType;
 
-  @Column()
+  @Column({
+    name: 'name',
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+  })
   name: string;
 
-  @Column()
+  @Column({
+    name: 'color',
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+  })
   color: string;
 
   @Column({
+    name: 'rate',
     type: 'decimal',
   })
   rate: number;

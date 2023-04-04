@@ -2,9 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
-import { CreateWalletRequestDto, WalletDto } from './dto';
+import {
+  WalletCreateRequestDto,
+  WalletDeleteRequestDto,
+  WalletDto,
+} from './dto';
 import { WalletEntity } from './entities';
-import {CurrencyService} from "../currency/currency.service";
+import { CurrencyService } from '../currency/currency.service';
 
 @Injectable()
 export class WalletsService {
@@ -15,7 +19,7 @@ export class WalletsService {
     private readonly currencyService: CurrencyService,
   ) {}
 
-  public async getAll(userId: string): Promise<WalletEntity[]> {
+  public async getAll(userId: string): Promise<WalletDto[]> {
     return await this.walletsRepository
       .createQueryBuilder('wallet')
       .leftJoinAndSelect('wallet.user', 'user')
@@ -24,16 +28,23 @@ export class WalletsService {
       .getMany();
   }
 
-  public async create(input: CreateWalletRequestDto): Promise<WalletEntity> {
-    const { currencyId, userId } = input;
-    const user = await this.usersService.findById(userId);
-    const currency = await this.currencyService.findById(currencyId);
+  public async create(
+    userId: string,
+    request: WalletCreateRequestDto,
+  ): Promise<WalletDto> {
+    const { currencyId } = request;
+    const user = await this.usersService.getById(userId);
+    const currency = await this.currencyService.getById(currencyId);
 
     if (!user) {
       throw new NotFoundException(`user with id ${userId} not found`);
     }
 
-    const wallet = this.walletsRepository.create({ ...input, currency, user });
+    const wallet = this.walletsRepository.create({
+      ...request,
+      currency,
+      user,
+    });
 
     const { raw } = await this.walletsRepository
       .createQueryBuilder()
@@ -44,6 +55,24 @@ export class WalletsService {
       .execute();
 
     return await this.findById(raw[0].id);
+  }
+
+  public async deleteWallet(request: WalletDeleteRequestDto) {
+    const { walletId } = request;
+
+    const wallet = await this.findById(walletId);
+    if (!wallet) {
+      throw new NotFoundException('wallet not found');
+    }
+
+    await this.walletsRepository
+      .createQueryBuilder('wallet')
+      .delete()
+      .from(WalletEntity)
+      .where('id = :walletId', { walletId })
+      .execute();
+
+    return wallet;
   }
 
   public async findById(id: string): Promise<WalletEntity> {

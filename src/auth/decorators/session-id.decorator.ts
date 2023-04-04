@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import RefreshTokenPayload from '../interfaces/refresh-token-payload.interface';
+import RefreshTokenPayload from '../model/refresh-token-payload';
 
 export const SessionId = createParamDecorator(
   async (_, context: ExecutionContext) => {

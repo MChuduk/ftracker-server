@@ -2,17 +2,32 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type UserType {
+type TransactionCategoryDto {
+  id: ID!
+  name: String!
+  color: String!
+  svgPath: String!
+}
+
+type UserDto {
   id: ID!
   displayName: String!
   email: String!
   password: String!
+  settingsId: String!
 }
 
-type SessionType {
+type SessionDto {
   id: ID!
-  user: UserType!
   refreshToken: String!
+  userId: ID!
+}
+
+type WalletDto {
+  id: ID!
+  name: String!
+  userId: ID!
+  currencyId: ID!
 }
 
 type CurrencyDto {
@@ -29,45 +44,64 @@ enum CurrencyType {
   EUR
 }
 
-type WalletDto {
-  id: ID!
-  name: String!
-  user: UserType!
-  currency: CurrencyDto!
+type TransactionDto {
+  id: String!
+  amount: Float!
+  description: String!
+  date: DateTime!
+  categoryId: String!
+  userId: String!
+  walletId: String!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Query {
-  currentUser: UserType!
-  test: String!
-  getAllWallets(input: GetAllWalletsDto!): [WalletDto!]!
-  getAllCurrency: [CurrencyDto!]!
-}
-
-input GetAllWalletsDto {
-  userId: String!
+  currentUser: UserDto!
+  defaultTransactionCategories: [TransactionCategoryDto!]!
+  transactionCategories: [TransactionCategoryDto!]!
+  wallets: [WalletDto!]!
+  currency: [CurrencyDto!]!
+  transactions: [TransactionDto!]!
 }
 
 type Mutation {
-  signUpLocal(credentials: SignUpLocalInput!): UserType!
-  signInLocal(credentials: SignInLocalInput!): SessionType!
-  logout: SessionType!
-  refresh: SessionType!
-  createWallet(input: CreateWalletRequestDto!): WalletDto!
+  signUp(request: SignUpRequestDto!): UserDto!
+  signIn(request: SignInRequestDto!): SessionDto!
+  logout: SessionDto!
+  refresh: SessionDto!
+  createWallet(request: WalletCreateRequestDto!): WalletDto!
+  deleteWallet(request: WalletDeleteRequestDto!): WalletDto!
+  createTransaction(request: TransactionCreateRequestDto!): TransactionDto!
 }
 
-input SignUpLocalInput {
+input SignUpRequestDto {
   displayName: String!
   email: String!
   password: String!
 }
 
-input SignInLocalInput {
+input SignInRequestDto {
   email: String!
   password: String!
 }
 
-input CreateWalletRequestDto {
+input WalletCreateRequestDto {
   name: String!
-  userId: ID!
   currencyId: ID!
+}
+
+input WalletDeleteRequestDto {
+  walletId: ID!
+}
+
+input TransactionCreateRequestDto {
+  amount: Float!
+  description: String!
+  date: DateTime!
+  categoryId: ID!
+  walletId: ID!
 }
