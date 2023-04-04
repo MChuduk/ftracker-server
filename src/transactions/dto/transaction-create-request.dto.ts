@@ -14,5 +14,8 @@ export class TransactionCreateRequestDto {
   date: Date;
   @Field(() => ID)
   @IsUUID()
+  readonly categoryId: string;
+  @Field(() => ID)
+  @IsUUID()
   readonly walletId: string;
 }

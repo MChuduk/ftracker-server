@@ -5,11 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionEntity } from './entity';
 import { UsersModule } from '../users/users.module';
 import { WalletsModule } from '../wallets/wallets.module';
+import { TransactionCategoriesModule } from '../transaction-categories/transaction-categories.module';
 
 @Module({
   imports: [
     UsersModule,
     WalletsModule,
+    TransactionCategoriesModule,
     TypeOrmModule.forFeature([TransactionEntity]),
   ],
   providers: [TransactionsResolver, TransactionsService],

@@ -49,6 +49,7 @@ type TransactionDto {
   amount: Float!
   description: String!
   date: DateTime!
+  categoryId: String!
   userId: String!
   walletId: String!
 }
@@ -101,5 +102,6 @@ input TransactionCreateRequestDto {
   amount: Float!
   description: String!
   date: DateTime!
+  categoryId: ID!
   walletId: ID!
 }

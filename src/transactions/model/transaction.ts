@@ -3,6 +3,7 @@ export interface Transaction {
   amount: number;
   description: string;
   date: Date;
+  categoryId: string;
   walletId: string;
   userId: string;
 }

@@ -12,6 +12,8 @@ export class TransactionDto implements Transaction {
   @Field()
   readonly date: Date;
   @Field()
+  readonly categoryId: string;
+  @Field()
   readonly userId: string;
   @Field()
   readonly walletId: string;

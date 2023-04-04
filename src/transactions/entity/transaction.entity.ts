@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { WalletEntity } from '../../wallets/entities';
 import { UserEntity } from '../../users/entities';
 import { BaseEntity } from '../../common/entity';
+import { TransactionCategoryEntity } from '../../transaction-categories/entity';
 
 @Entity('transactions')
 export class TransactionEntity extends BaseEntity {
@@ -28,6 +29,13 @@ export class TransactionEntity extends BaseEntity {
   date: Date;
 
   @Column({
+    name: 'category_id',
+    type: 'uuid',
+    nullable: false,
+  })
+  categoryId: string;
+
+  @Column({
     name: 'wallet_id',
     type: 'uuid',
     nullable: false,
@@ -40,6 +48,10 @@ export class TransactionEntity extends BaseEntity {
     nullable: false,
   })
   userId: string;
+
+  @ManyToOne(() => TransactionCategoryEntity, { nullable: false })
+  @JoinColumn({ name: 'category_id' })
+  category: TransactionCategoryEntity;
 
   @ManyToOne(() => WalletEntity, { nullable: false })
   @JoinColumn({ name: 'wallet_id' })

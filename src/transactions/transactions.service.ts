@@ -6,12 +6,14 @@ import { TransactionEntity } from './entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WalletsService } from '../wallets/wallets.service';
 import { UsersService } from '../users/users.service';
+import { TransactionCategoriesService } from '../transaction-categories/transaction.categories.service';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private readonly usersService: UsersService,
     private readonly walletService: WalletsService,
+    private readonly transactionCategoriesService: TransactionCategoriesService,
     @InjectRepository(TransactionEntity)
     private readonly transactionsRepository: Repository<TransactionEntity>,
   ) {}
@@ -30,16 +32,19 @@ export class TransactionsService {
     userId: string,
     request: TransactionCreateRequestDto,
   ): Promise<Transaction> {
-    const user = await this.usersService.getById(userId);
-    const wallet = await this.walletService.findById(request.walletId);
-    if (!user) throw new NotFoundException('user not found');
-    if (!wallet) throw new NotFoundException('wallet not found');
+    const [user, wallet, category] = await Promise.all([
+      this.usersService.getById(userId),
+      this.walletService.findById(request.walletId),
+      this.transactionCategoriesService.getById(request.categoryId),
+    ]);
+    if (!user || !wallet || !category)
+      throw new NotFoundException('user, wallet or category not found');
 
     const transaction = this.transactionsRepository.create({
       ...request,
       userId,
+      walletId: wallet.id,
     });
-    transaction.wallet = wallet;
 
     const { raw } = await this.transactionsRepository
       .createQueryBuilder()
