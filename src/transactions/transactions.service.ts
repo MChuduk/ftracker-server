@@ -23,6 +23,7 @@ export class TransactionsService {
       .createQueryBuilder('transaction')
       .leftJoinAndSelect('transaction.user', 'user')
       .leftJoinAndSelect('transaction.wallet', 'wallet')
+      .leftJoinAndSelect('transaction.category', 'category')
       .leftJoinAndSelect('wallet.currency', 'currency')
       .where('transaction.user.id = :userId', { userId })
       .getMany();
@@ -61,5 +62,17 @@ export class TransactionsService {
       .createQueryBuilder('transaction')
       .where('transaction.id = :id', { id })
       .getOne();
+  }
+
+  public async delete(id: string): Promise<Transaction> {
+    const transaction = await this.findById(id);
+    if (!transaction) throw new NotFoundException('transaction not found');
+    await this.transactionsRepository
+      .createQueryBuilder('transaction')
+      .delete()
+      .from(TransactionEntity)
+      .where('id = :id', { id })
+      .execute();
+    return transaction;
   }
 }

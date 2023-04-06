@@ -1,5 +1,7 @@
 import { Transaction } from '../model';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { WalletDto } from '../../wallets/dto';
+import { TransactionCategoryDto } from '../../transaction-categories/dto';
 
 @ObjectType()
 export class TransactionDto implements Transaction {
@@ -17,4 +19,8 @@ export class TransactionDto implements Transaction {
   readonly userId: string;
   @Field()
   readonly walletId: string;
+  @Field()
+  readonly wallet?: WalletDto;
+  @Field()
+  readonly category?: TransactionCategoryDto;
 }

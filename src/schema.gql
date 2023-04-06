@@ -23,13 +23,6 @@ type SessionDto {
   userId: ID!
 }
 
-type WalletDto {
-  id: ID!
-  name: String!
-  userId: ID!
-  currencyId: ID!
-}
-
 type CurrencyDto {
   id: ID!
   type: CurrencyType!
@@ -44,6 +37,14 @@ enum CurrencyType {
   EUR
 }
 
+type WalletDto {
+  id: ID!
+  name: String!
+  userId: ID!
+  currencyId: ID!
+  currency: CurrencyDto!
+}
+
 type TransactionDto {
   id: String!
   amount: Float!
@@ -52,6 +53,8 @@ type TransactionDto {
   categoryId: String!
   userId: String!
   walletId: String!
+  wallet: WalletDto!
+  category: TransactionCategoryDto!
 }
 
 """
@@ -76,6 +79,7 @@ type Mutation {
   createWallet(request: WalletCreateRequestDto!): WalletDto!
   deleteWallet(request: WalletDeleteRequestDto!): WalletDto!
   createTransaction(request: TransactionCreateRequestDto!): TransactionDto!
+  deleteTransaction(request: TransactionDeleteRequestDto!): TransactionDto!
 }
 
 input SignUpRequestDto {
@@ -104,4 +108,8 @@ input TransactionCreateRequestDto {
   date: DateTime!
   categoryId: ID!
   walletId: ID!
+}
+
+input TransactionDeleteRequestDto {
+  transactionId: ID!
 }
