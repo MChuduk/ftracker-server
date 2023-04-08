@@ -4,6 +4,7 @@ import {
   TransactionCreateRequestDto,
   TransactionDeleteRequestDto,
   TransactionDto,
+  TransactionQueryRequestDto,
 } from './dto';
 import { UserId } from '../auth/decorators';
 
@@ -14,8 +15,9 @@ export class TransactionsResolver {
   @Query(() => [TransactionDto])
   public async transactions(
     @UserId() userId: string,
+    @Args('request', { nullable: true }) request: TransactionQueryRequestDto,
   ): Promise<TransactionDto[]> {
-    return this.transactionsService.getAll(userId);
+    return this.transactionsService.getAll(userId, request);
   }
 
   @Mutation(() => TransactionDto, { name: 'createTransaction' })

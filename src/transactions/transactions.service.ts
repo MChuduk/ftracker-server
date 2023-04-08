@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TransactionCreateRequestDto } from './dto';
+import {
+  TransactionCreateRequestDto,
+  TransactionDeleteRequestDto,
+  TransactionQueryRequestDto,
+} from './dto';
 import { Transaction } from './model';
 import { Repository } from 'typeorm';
 import { TransactionEntity } from './entity';
@@ -18,15 +22,31 @@ export class TransactionsService {
     private readonly transactionsRepository: Repository<TransactionEntity>,
   ) {}
 
-  public async getAll(userId: string): Promise<Transaction[]> {
-    return this.transactionsRepository
+  public async getAll(
+    userId: string,
+    request: TransactionQueryRequestDto,
+  ): Promise<Transaction[]> {
+    const query = this.transactionsRepository
       .createQueryBuilder('transaction')
       .leftJoinAndSelect('transaction.user', 'user')
       .leftJoinAndSelect('transaction.wallet', 'wallet')
       .leftJoinAndSelect('transaction.category', 'category')
       .leftJoinAndSelect('wallet.currency', 'currency')
-      .where('transaction.user.id = :userId', { userId })
-      .getMany();
+      .where('transaction.user.id = :userId', { userId });
+    if (request.pagination) {
+      query.skip(request.pagination.page * request.pagination.limit);
+      query.take(request.pagination.limit);
+    }
+    if (request.dateBetween) {
+      query.andWhere(`transaction.date between :startDate and :endDate`, {
+        startDate: request.dateBetween.startDate,
+        endDate: request.dateBetween.endDate,
+      });
+    }
+    if (request.dateOrder) {
+      query.orderBy('transaction.date', request.dateOrder);
+    }
+    return query.getMany();
   }
 
   public async create(

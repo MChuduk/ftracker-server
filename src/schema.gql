@@ -68,7 +68,23 @@ type Query {
   transactionCategories: [TransactionCategoryDto!]!
   wallets: [WalletDto!]!
   currency: [CurrencyDto!]!
-  transactions: [TransactionDto!]!
+  transactions(request: TransactionQueryRequestDto): [TransactionDto!]!
+}
+
+input TransactionQueryRequestDto {
+  pagination: PaginationDto
+  dateBetween: DatePeriodDto
+  dateOrder: String
+}
+
+input PaginationDto {
+  page: Float!
+  limit: Float!
+}
+
+input DatePeriodDto {
+  startDate: DateTime!
+  endDate: DateTime!
 }
 
 type Mutation {
