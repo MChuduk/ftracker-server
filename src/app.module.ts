@@ -13,6 +13,7 @@ import { CurrencyModule } from './currency/currency.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TransactionsModule } from './transactions/transactions.module';
 import { TransactionCategoriesModule } from './transaction-categories/transaction-categories.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TransactionCategoriesModule } from './transaction-categories/transactio
     CurrencyModule,
     TransactionsModule,
     TransactionCategoriesModule,
+    StatsModule,
   ],
   providers: [
     {

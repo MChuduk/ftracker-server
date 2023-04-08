@@ -5,8 +5,8 @@ import { IsDate } from 'class-validator';
 export class DatePeriodDto {
   @Field()
   @IsDate()
-  readonly startDate: Date;
+  readonly startDate: string;
   @Field()
   @IsDate()
-  readonly endDate: Date;
+  readonly endDate: string;
 }

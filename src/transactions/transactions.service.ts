@@ -24,7 +24,7 @@ export class TransactionsService {
 
   public async getAll(
     userId: string,
-    request: TransactionQueryRequestDto,
+    request?: TransactionQueryRequestDto,
   ): Promise<Transaction[]> {
     const query = this.transactionsRepository
       .createQueryBuilder('transaction')
@@ -33,18 +33,33 @@ export class TransactionsService {
       .leftJoinAndSelect('transaction.category', 'category')
       .leftJoinAndSelect('wallet.currency', 'currency')
       .where('transaction.user.id = :userId', { userId });
-    if (request.pagination) {
-      query.skip(request.pagination.page * request.pagination.limit);
-      query.take(request.pagination.limit);
+    if (request?.walletId) {
+      query.andWhere('transaction.walletId = :walletId', {
+        walletId: request.walletId,
+      });
     }
-    if (request.dateBetween) {
+    if (request?.date) {
+      query.andWhere('date(transaction.date) = date(:date)', {
+        date: request.date,
+      });
+    }
+    if (request?.currencyId) {
+      query.andWhere('wallet.currency.id = :currencyId', {
+        currencyId: request.currencyId,
+      });
+    }
+    if (request?.dateBetween) {
       query.andWhere(`transaction.date between :startDate and :endDate`, {
         startDate: request.dateBetween.startDate,
         endDate: request.dateBetween.endDate,
       });
     }
-    if (request.dateOrder) {
+    if (request?.dateOrder) {
       query.orderBy('transaction.date', request.dateOrder);
+    }
+    if (request?.pagination) {
+      query.skip(request.pagination.page * request.pagination.limit);
+      query.take(request.pagination.limit);
     }
     return query.getMany();
   }
