@@ -26,8 +26,9 @@ export class WalletsResolver {
 
   @Mutation(() => WalletDto, { name: 'deleteWallet' })
   public async deleteWallet(
+    @UserId() userId: string,
     @Args('request') request: WalletDeleteRequestDto,
   ): Promise<WalletDto> {
-    return this.walletsService.deleteWallet(request);
+    return this.walletsService.deleteWallet(userId, request);
   }
 }

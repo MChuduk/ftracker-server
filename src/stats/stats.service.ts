@@ -40,19 +40,22 @@ export class StatsService {
   ): Promise<WalletStatsByDatesDto> {
     const wallet = await this.walletsService.findById(request.walletId);
     if (!wallet) throw new NotFoundException('Wallet not found');
-    const startDate = new Date(request.dateBetween.startDate);
+    const currentDate = new Date(request.dateBetween.startDate);
     const endDate = new Date(request.dateBetween.endDate);
     const dates = [];
-    while (startDate <= endDate) {
+    while (currentDate <= endDate) {
       const transactions = await this.transactionsService.getAll(userId, {
         walletId: request.walletId,
-        date: startDate.toISOString(),
+        dateBetween: {
+          startDate: request.dateBetween.startDate,
+          endDate: currentDate.toISOString(),
+        }
       });
       const amount = transactions
         .map((transaction) => +transaction.amount)
         .reduce((totalAmount, amount) => totalAmount + amount, 0);
-      dates.push({ date: new Date(startDate).toISOString(), amount });
-      startDate.setDate(startDate.getDate() + 1);
+      dates.push({ date: new Date(currentDate).toISOString(), amount });
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     return { wallet, dates };
   }

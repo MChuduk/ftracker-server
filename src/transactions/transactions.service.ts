@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import {
-  TransactionCreateRequestDto,
-  TransactionDeleteRequestDto,
-  TransactionQueryRequestDto,
-} from './dto';
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { TransactionCreateRequestDto, TransactionQueryRequestDto } from './dto';
 import { Transaction } from './model';
 import { Repository } from 'typeorm';
 import { TransactionEntity } from './entity';
@@ -16,6 +17,7 @@ import { TransactionCategoriesService } from '../transaction-categories/transact
 export class TransactionsService {
   constructor(
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => WalletsService))
     private readonly walletService: WalletsService,
     private readonly transactionCategoriesService: TransactionCategoriesService,
     @InjectRepository(TransactionEntity)

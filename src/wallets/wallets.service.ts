@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
@@ -9,6 +14,7 @@ import {
 } from './dto';
 import { WalletEntity } from './entities';
 import { CurrencyService } from '../currency/currency.service';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Injectable()
 export class WalletsService {
@@ -17,6 +23,8 @@ export class WalletsService {
     private readonly walletsRepository: Repository<WalletEntity>,
     private readonly usersService: UsersService,
     private readonly currencyService: CurrencyService,
+    @Inject(forwardRef(() => TransactionsService))
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   public async getAll(userId: string): Promise<WalletDto[]> {
@@ -57,13 +65,21 @@ export class WalletsService {
     return await this.findById(raw[0].id);
   }
 
-  public async deleteWallet(request: WalletDeleteRequestDto) {
+  public async deleteWallet(userId: string, request: WalletDeleteRequestDto) {
     const { walletId } = request;
 
     const wallet = await this.findById(walletId);
     if (!wallet) {
       throw new NotFoundException('wallet not found');
     }
+    const transactions = await this.transactionsService.getAll(userId, {
+      walletId,
+    });
+    await Promise.all([
+      transactions.map((transaction) =>
+        this.transactionsService.delete(transaction.id),
+      ),
+    ]);
 
     await this.walletsRepository
       .createQueryBuilder('wallet')
