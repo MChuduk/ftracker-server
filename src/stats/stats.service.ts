@@ -23,9 +23,9 @@ export class StatsService {
   ): Promise<WalletStatsDto> {
     const wallet = await this.walletsService.findById(request.walletId);
     if (!wallet) throw new NotFoundException('Wallet not found');
-    const transactions = await this.transactionsService.getAll(userId, {
-      walletId: request.walletId,
-      dateBetween: request.dateBetween,
+    const transactions = await this.transactionsService.findAllWithParams({
+      userId,
+      ...request,
     });
     const totalAmount = transactions
       .map((transaction) => +transaction.amount)
@@ -40,16 +40,13 @@ export class StatsService {
   ): Promise<WalletStatsByDatesDto> {
     const wallet = await this.walletsService.findById(request.walletId);
     if (!wallet) throw new NotFoundException('Wallet not found');
-    const currentDate = new Date(request.dateBetween.startDate);
-    const endDate = new Date(request.dateBetween.endDate);
+    const currentDate = new Date(request.fromDate);
+    const endDate = new Date(request.toDate);
     const dates = [];
     while (currentDate <= endDate) {
-      const transactions = await this.transactionsService.getAll(userId, {
-        walletId: request.walletId,
-        dateBetween: {
-          startDate: request.dateBetween.startDate,
-          endDate: currentDate.toISOString(),
-        }
+      const transactions = await this.transactionsService.findAllWithParams({
+        userId,
+        ...request,
       });
       const amount = transactions
         .map((transaction) => +transaction.amount)

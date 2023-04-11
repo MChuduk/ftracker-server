@@ -1,6 +1,5 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsOptional, IsUUID } from 'class-validator';
-import { DatePeriodDto } from '../../common/dto';
+import { IsDateString, IsOptional, IsUUID } from 'class-validator';
 
 @InputType()
 export class WalletStatsByDatesQueryRequestDto {
@@ -14,5 +13,11 @@ export class WalletStatsByDatesQueryRequestDto {
 
   @Field()
   @IsOptional()
-  readonly dateBetween: DatePeriodDto;
+  @IsDateString()
+  readonly fromDate?: string;
+
+  @Field()
+  @IsOptional()
+  @IsDateString()
+  readonly toDate?: string;
 }

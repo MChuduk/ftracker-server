@@ -90,10 +90,12 @@ type Query {
 
 input TransactionQueryRequestDto {
   pagination: PaginationDto
+  userId: String
   walletId: ID
   currencyId: ID
   date: String
-  dateBetween: DatePeriodDto
+  fromDate: String
+  toDate: String
   dateOrder: String
 }
 
@@ -102,19 +104,16 @@ input PaginationDto {
   limit: Float!
 }
 
-input DatePeriodDto {
-  startDate: String!
-  endDate: String!
-}
-
 input WalletStatsQueryRequestDto {
   walletId: ID!
-  dateBetween: DatePeriodDto
+  fromDate: String
+  toDate: String
 }
 
 input WalletStatsByDatesQueryRequestDto {
   walletId: ID!
-  dateBetween: DatePeriodDto!
+  fromDate: String!
+  toDate: String!
 }
 
 type Mutation {

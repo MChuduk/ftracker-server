@@ -72,7 +72,8 @@ export class WalletsService {
     if (!wallet) {
       throw new NotFoundException('wallet not found');
     }
-    const transactions = await this.transactionsService.getAll(userId, {
+    const transactions = await this.transactionsService.findAllWithParams({
+      userId,
       walletId,
     });
     await Promise.all([

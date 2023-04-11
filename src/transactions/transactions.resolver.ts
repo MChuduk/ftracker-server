@@ -14,10 +14,10 @@ export class TransactionsResolver {
 
   @Query(() => [TransactionDto])
   public async transactions(
-    @UserId() userId: string,
     @Args('request', { nullable: true }) request: TransactionQueryRequestDto,
   ): Promise<TransactionDto[]> {
-    return this.transactionsService.getAll(userId, request);
+    return this.transactionsService.findAllWithParams(request);
+    //return this.transactionsService.getAll(userId, request);
   }
 
   @Mutation(() => TransactionDto, { name: 'createTransaction' })
