@@ -77,7 +77,7 @@ export class TransactionsService {
     return transaction;
   }
 
-  private createQueryFindManyConditionWithRelations(
+  public createQueryFindManyConditionWithRelations(
     request?: TransactionQueryRequestDto,
   ): SelectQueryBuilder<TransactionEntity> {
     const defaultFilter = new TransactionFilter();

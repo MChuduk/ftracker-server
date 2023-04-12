@@ -77,6 +77,15 @@ type WalletStatsByDatesDto {
   dates: [DatesDto!]!
 }
 
+type UserBudgetReportDataDto {
+  date: String!
+  totalAmount: Float!
+}
+
+type UserBudgetReportDto {
+  data: [UserBudgetReportDataDto!]!
+}
+
 type Query {
   currentUser: UserDto!
   defaultTransactionCategories: [TransactionCategoryDto!]!
@@ -86,6 +95,7 @@ type Query {
   transactions(request: TransactionQueryRequestDto): [TransactionDto!]!
   walletStats(request: WalletStatsQueryRequestDto!): WalletStatsDto!
   walletStatsByDates(request: WalletStatsByDatesQueryRequestDto!): WalletStatsByDatesDto!
+  userBudgetReport(request: TransactionQueryRequestDto!): UserBudgetReportDto!
 }
 
 input TransactionQueryRequestDto {
