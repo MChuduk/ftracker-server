@@ -96,6 +96,7 @@ export class WalletsService {
     return await this.walletsRepository
       .createQueryBuilder('wallet')
       .leftJoinAndSelect('wallet.user', 'user')
+      .leftJoinAndSelect('wallet.currency', 'currency')
       .where('wallet.id = :id', { id })
       .getOne();
   }

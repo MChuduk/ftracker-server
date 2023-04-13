@@ -64,16 +64,6 @@ type WalletStatsDto {
   totalAmount: Float!
 }
 
-type DatesDto {
-  date: String!
-  amount: Float!
-}
-
-type WalletStatsByDatesDto {
-  wallet: WalletDto!
-  dates: [DatesDto!]!
-}
-
 type UserBudgetReportDataDto {
   date: String!
   totalAmount: Float!
@@ -81,6 +71,15 @@ type UserBudgetReportDataDto {
 
 type UserBudgetReportDto {
   data: [UserBudgetReportDataDto!]!
+}
+
+type WalletActivityReportDataDto {
+  date: String!
+  count: Float!
+}
+
+type WalletActivityReportDto {
+  data: [WalletActivityReportDataDto!]!
 }
 
 type Query {
@@ -91,7 +90,7 @@ type Query {
   currency: [CurrencyDto!]!
   transactions(request: TransactionQueryRequestDto): [TransactionDto!]!
   walletStats(request: WalletStatsQueryRequestDto!): WalletStatsDto!
-  walletStatsByDates(request: WalletStatsByDatesQueryRequestDto!): WalletStatsByDatesDto!
+  walletActivityReport(request: WalletActivityReportQueryRequestDto!): WalletActivityReportDto!
   userBudgetReport(request: TransactionQueryRequestDto!): UserBudgetReportDto!
 }
 
@@ -117,10 +116,10 @@ input WalletStatsQueryRequestDto {
   toDate: String
 }
 
-input WalletStatsByDatesQueryRequestDto {
+input WalletActivityReportQueryRequestDto {
   walletId: ID!
-  fromDate: String!
-  toDate: String!
+  fromDate: String
+  toDate: String
 }
 
 type Mutation {

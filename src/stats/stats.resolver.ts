@@ -2,8 +2,8 @@ import { Args, Query, Resolver } from '@nestjs/graphql';
 import { StatsService } from './stats.service';
 import {
   UserBudgetReportDto,
-  WalletStatsByDatesDto,
-  WalletStatsByDatesQueryRequestDto,
+  WalletActivityReportDto,
+  WalletActivityReportQueryRequestDto,
   WalletStatsDto,
   WalletStatsQueryRequestDto,
 } from './dto';
@@ -22,12 +22,11 @@ export class StatsResolver {
     return this.statsService.getWalletStats(userId, request);
   }
 
-  @Query(() => WalletStatsByDatesDto, { name: 'walletStatsByDates' })
-  public async walletStatsByDates(
-    @UserId() userId: string,
-    @Args('request') request: WalletStatsByDatesQueryRequestDto,
-  ): Promise<WalletStatsByDatesDto> {
-    return this.statsService.getWalletsStatsByDates(userId, request);
+  @Query(() => WalletActivityReportDto, { name: 'walletActivityReport' })
+  public async walletActivityReport(
+    @Args('request') request: WalletActivityReportQueryRequestDto,
+  ): Promise<WalletActivityReportDto> {
+    return this.statsService.getWalletActivityReport(request);
   }
 
   @Query(() => UserBudgetReportDto, { name: 'userBudgetReport' })
