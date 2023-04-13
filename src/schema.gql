@@ -49,18 +49,15 @@ type TransactionDto {
   id: String!
   amount: Float!
   description: String!
-  date: DateTime!
+  date: String!
+  createdAt: String!
+  updatedAt: String!
   categoryId: String!
   userId: String!
   walletId: String!
   wallet: WalletDto!
   category: TransactionCategoryDto!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type WalletStatsDto {
   wallet: WalletDto!
@@ -164,6 +161,11 @@ input TransactionCreateRequestDto {
   categoryId: ID!
   walletId: ID!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 input TransactionDeleteRequestDto {
   transactionId: ID!

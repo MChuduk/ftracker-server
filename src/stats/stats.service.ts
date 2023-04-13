@@ -59,6 +59,7 @@ export class StatsService {
     for (const row of dateRows) {
       const query =
         this.transactionsService.createQueryFindManyConditionWithRelations({
+          fromDate,
           toDate: row.date,
           ...request,
         });

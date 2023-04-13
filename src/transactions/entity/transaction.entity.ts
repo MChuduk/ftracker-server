@@ -23,7 +23,7 @@ export class TransactionEntity extends BaseEntity {
 
   @Column({
     name: 'date',
-    type: 'timestamp with time zone',
+    type: 'date',
     nullable: false,
   })
   date: Date;

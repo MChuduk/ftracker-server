@@ -11,8 +11,12 @@ export class TransactionDto implements Transaction {
   readonly amount: number;
   @Field()
   readonly description: string;
-  @Field()
+  @Field(() => String)
   readonly date: Date;
+  @Field(() => String)
+  readonly createdAt: Date;
+  @Field(() => String)
+  readonly updatedAt: Date;
   @Field()
   readonly categoryId: string;
   @Field()
