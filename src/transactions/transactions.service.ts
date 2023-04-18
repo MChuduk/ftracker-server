@@ -106,4 +106,8 @@ export class TransactionsService {
     }
     return query;
   }
+
+  public async saveTransaction(transaction: TransactionEntity): Promise<void> {
+    await this.transactionsRepository.save(transaction);
+  }
 }

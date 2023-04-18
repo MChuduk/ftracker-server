@@ -29,6 +29,8 @@ type CurrencyDto {
   name: String!
   color: String!
   rate: Float!
+  createdAt: String!
+  updatedAt: String!
 }
 
 enum CurrencyType {
@@ -86,12 +88,17 @@ type Query {
   currentUser: UserDto!
   defaultTransactionCategories: [TransactionCategoryDto!]!
   transactionCategories: [TransactionCategoryDto!]!
-  wallets: [WalletDto!]!
+  wallets(request: WalletQueryRequestDto!): [WalletDto!]!
   currency: [CurrencyDto!]!
   transactions(request: TransactionQueryRequestDto): [TransactionDto!]!
   walletStats(request: WalletStatsQueryRequestDto!): WalletStatsDto!
   walletActivityReport(request: WalletActivityReportQueryRequestDto!): WalletActivityReportDto!
   userBudgetReport(request: TransactionQueryRequestDto!): UserBudgetReportDto!
+}
+
+input WalletQueryRequestDto {
+  userId: ID
+  walletId: ID
 }
 
 input TransactionQueryRequestDto {
@@ -129,6 +136,7 @@ type Mutation {
   refresh: SessionDto!
   createWallet(request: WalletCreateRequestDto!): WalletDto!
   deleteWallet(request: WalletDeleteRequestDto!): WalletDto!
+  updateWallet(request: WalletUpdateRequestDto!): WalletDto!
   createTransaction(request: TransactionCreateRequestDto!): TransactionDto!
   deleteTransaction(request: TransactionDeleteRequestDto!): TransactionDto!
 }
@@ -151,6 +159,12 @@ input WalletCreateRequestDto {
 
 input WalletDeleteRequestDto {
   walletId: ID!
+}
+
+input WalletUpdateRequestDto {
+  walletId: ID!
+  name: String
+  currencyId: ID!
 }
 
 input TransactionCreateRequestDto {

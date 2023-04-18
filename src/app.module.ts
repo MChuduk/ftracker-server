@@ -19,7 +19,7 @@ import { StatsModule } from './stats/stats.module';
   imports: [
     GraphQLModule.forRoot({
       cors: {
-        origin: 'http://192.168.253.209:3000',
+        origin: 'http://localhost:3000',
         credentials: true,
       },
       driver: ApolloDriver,

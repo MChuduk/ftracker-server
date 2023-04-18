@@ -3,6 +3,7 @@ import {
   WalletCreateRequestDto,
   WalletDeleteRequestDto,
   WalletDto,
+  WalletQueryRequestDto, WalletUpdateRequestDto,
 } from './dto';
 import { WalletsService } from './wallets.service';
 import { UserId } from '../auth/decorators';
@@ -12,8 +13,10 @@ export class WalletsResolver {
   constructor(private readonly walletsService: WalletsService) {}
 
   @Query(() => [WalletDto], { name: 'wallets' })
-  public async wallets(@UserId() userId: string): Promise<WalletDto[]> {
-    return await this.walletsService.getAll(userId);
+  public async wallets(
+    @Args('request') request: WalletQueryRequestDto,
+  ): Promise<WalletDto[]> {
+    return await this.walletsService.getAll(request);
   }
 
   @Mutation(() => WalletDto, { name: 'createWallet' })
@@ -30,5 +33,10 @@ export class WalletsResolver {
     @Args('request') request: WalletDeleteRequestDto,
   ): Promise<WalletDto> {
     return this.walletsService.deleteWallet(userId, request);
+  }
+
+  @Mutation(() => WalletDto, { name: 'updateWallet' })
+  public async updateWallet(@Args('request') request: WalletUpdateRequestDto) {
+    return this.walletsService.updateWallet(request);
   }
 }

@@ -11,10 +11,13 @@ import {
   WalletCreateRequestDto,
   WalletDeleteRequestDto,
   WalletDto,
+  WalletQueryRequestDto,
+  WalletUpdateRequestDto,
 } from './dto';
 import { WalletEntity } from './entities';
 import { CurrencyService } from '../currency/currency.service';
 import { TransactionsService } from '../transactions/transactions.service';
+import { WalletFilter } from './model';
 
 @Injectable()
 export class WalletsService {
@@ -27,13 +30,21 @@ export class WalletsService {
     private readonly transactionsService: TransactionsService,
   ) {}
 
-  public async getAll(userId: string): Promise<WalletDto[]> {
-    return await this.walletsRepository
+  public async getAll(request: WalletQueryRequestDto): Promise<WalletDto[]> {
+    const defaultFilter = new WalletFilter();
+    const filter = { ...defaultFilter, ...request };
+    const query = this.walletsRepository
       .createQueryBuilder('wallet')
       .leftJoinAndSelect('wallet.user', 'user')
       .leftJoinAndSelect('wallet.currency', 'currency')
-      .where('wallet.user.id = :userId', { userId })
-      .getMany();
+      .where((qb) => {
+        qb.where(
+          `(cast(:userId as uuid) is null OR wallet.user_id = :userId) AND ` +
+            `(cast(:walletId as uuid) is null OR wallet.id = :walletId)`,
+          filter,
+        );
+      });
+    return query.getMany();
   }
 
   public async create(
@@ -99,5 +110,31 @@ export class WalletsService {
       .leftJoinAndSelect('wallet.currency', 'currency')
       .where('wallet.id = :id', { id })
       .getOne();
+  }
+
+  public async updateWallet(request: WalletUpdateRequestDto) {
+    const wallet = await this.findById(request.walletId);
+    if (!wallet) throw new NotFoundException('wallet not found');
+    if (request.currencyId) {
+      const currency = await this.currencyService.getById(request.currencyId);
+      if (!currency) throw new NotFoundException('currency not found');
+      wallet.currency = {
+        id: currency.id,
+        ...currency,
+      };
+      wallet.currencyId = request.currencyId;
+
+      const transactions = await this.transactionsService.findAllWithParams({
+        walletId: wallet.id,
+      });
+      for (const transaction of transactions) {
+        transaction.amount =
+          (transaction.amount * transaction.wallet.currency.rate) /
+          currency.rate;
+        await this.transactionsService.saveTransaction(transaction);
+      }
+    }
+    if (request.name) wallet.name = request.name;
+    return await this.walletsRepository.save(wallet);
   }
 }

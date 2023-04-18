@@ -19,4 +19,8 @@ export class CurrencyDto implements Currency {
   readonly color: string;
   @Field()
   readonly rate: number;
+  @Field(() => String)
+  readonly createdAt: Date;
+  @Field(() => String)
+  readonly updatedAt: Date;
 }
