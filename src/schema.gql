@@ -7,6 +7,8 @@ type TransactionCategoryDto {
   name: String!
   color: String!
   svgPath: String!
+  active: Boolean!
+  userId: String!
 }
 
 type UserDto {
@@ -87,13 +89,23 @@ type WalletActivityReportDto {
 type Query {
   currentUser: UserDto!
   defaultTransactionCategories: [TransactionCategoryDto!]!
-  transactionCategories: [TransactionCategoryDto!]!
+  transactionCategories(request: TransactionQueryCategoryDto!): [TransactionCategoryDto!]!
   wallets(request: WalletQueryRequestDto!): [WalletDto!]!
   currency: [CurrencyDto!]!
   transactions(request: TransactionQueryRequestDto): [TransactionDto!]!
   walletStats(request: WalletStatsQueryRequestDto!): WalletStatsDto!
   walletActivityReport(request: WalletActivityReportQueryRequestDto!): WalletActivityReportDto!
   userBudgetReport(request: TransactionQueryRequestDto!): UserBudgetReportDto!
+}
+
+input TransactionQueryCategoryDto {
+  pagination: PaginationDto
+  active: Boolean
+}
+
+input PaginationDto {
+  page: Float!
+  limit: Float!
 }
 
 input WalletQueryRequestDto {
@@ -110,11 +122,6 @@ input TransactionQueryRequestDto {
   fromDate: String
   toDate: String
   dateOrder: String
-}
-
-input PaginationDto {
-  page: Float!
-  limit: Float!
 }
 
 input WalletStatsQueryRequestDto {
@@ -134,6 +141,9 @@ type Mutation {
   signIn(request: SignInRequestDto!): SessionDto!
   logout: SessionDto!
   refresh: SessionDto!
+  updateTransactionCategory(request: TransactionCategoryUpdateDto!): TransactionCategoryDto!
+  createTransactionCategory(request: TransactionCategoryCreateRequestDto!): TransactionCategoryDto!
+  deleteTransactionCategory(request: TransactionCategoryDeleteRequestDto!): TransactionCategoryDto!
   createWallet(request: WalletCreateRequestDto!): WalletDto!
   deleteWallet(request: WalletDeleteRequestDto!): WalletDto!
   updateWallet(request: WalletUpdateRequestDto!): WalletDto!
@@ -150,6 +160,21 @@ input SignUpRequestDto {
 input SignInRequestDto {
   email: String!
   password: String!
+}
+
+input TransactionCategoryUpdateDto {
+  categoryId: ID!
+  active: Boolean
+}
+
+input TransactionCategoryCreateRequestDto {
+  name: String!
+  svgPath: String!
+  color: String!
+}
+
+input TransactionCategoryDeleteRequestDto {
+  categoryId: ID!
 }
 
 input WalletCreateRequestDto {

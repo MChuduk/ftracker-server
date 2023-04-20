@@ -3,4 +3,6 @@ export interface TransactionCategory {
   name: string;
   color: string;
   svgPath: string;
+  active?: boolean;
+  userId?: string;
 }

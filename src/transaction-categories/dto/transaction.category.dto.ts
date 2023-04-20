@@ -11,4 +11,8 @@ export class TransactionCategoryDto implements TransactionCategory {
   readonly color: string;
   @Field()
   readonly svgPath: string;
+  @Field()
+  readonly active?: boolean;
+  @Field()
+  readonly userId?: string;
 }

@@ -19,6 +19,14 @@ export class UserTransactionCategoriesEntity extends BaseEntity {
   })
   transactionCategoryId: string;
 
+  @Column({
+    name: 'active',
+    type: 'boolean',
+    default: true,
+    nullable: false,
+  })
+  active: boolean;
+
   @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
