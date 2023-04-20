@@ -119,6 +119,12 @@ export class TransactionCategoriesService {
       });
     }
 
+    if (request.searchByName) {
+      query.andWhere('transactionCategory.name ILIKE :name', {
+        name: `%${request.searchByName}%`,
+      });
+    }
+
     const userCategories = await query.getMany();
     return userCategories.map((category) => ({
       ...category.transactionCategory,

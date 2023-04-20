@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { PaginationDto } from '../../common/dto';
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class TransactionQueryCategoryDto {
@@ -11,4 +11,9 @@ export class TransactionQueryCategoryDto {
   @Field({ nullable: true })
   @IsOptional()
   readonly active?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  readonly searchByName?: string;
 }

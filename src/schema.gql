@@ -101,6 +101,7 @@ type Query {
 input TransactionQueryCategoryDto {
   pagination: PaginationDto
   active: Boolean
+  searchByName: String
 }
 
 input PaginationDto {
