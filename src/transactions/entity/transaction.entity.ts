@@ -9,6 +9,8 @@ export class TransactionEntity extends BaseEntity {
   @Column({
     name: 'amount',
     type: 'decimal',
+    precision: 12,
+    scale: 2,
     nullable: false,
   })
   amount: number;
@@ -23,7 +25,7 @@ export class TransactionEntity extends BaseEntity {
 
   @Column({
     name: 'date',
-    type: 'timestamp with time zone',
+    type: 'date',
     nullable: false,
   })
   date: Date;

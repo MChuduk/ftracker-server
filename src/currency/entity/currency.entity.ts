@@ -31,6 +31,9 @@ export class CurrencyEntity extends BaseEntity {
   @Column({
     name: 'rate',
     type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: false,
   })
   rate: number;
 }

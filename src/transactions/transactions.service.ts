@@ -1,11 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import {
-  TransactionCreateRequestDto,
-  TransactionDeleteRequestDto,
-  TransactionQueryRequestDto,
-} from './dto';
-import { Transaction } from './model';
-import { Repository } from 'typeorm';
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { TransactionCreateRequestDto, TransactionQueryRequestDto } from './dto';
+import { Transaction, TransactionFilter } from './model';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { TransactionEntity } from './entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WalletsService } from '../wallets/wallets.service';
@@ -16,37 +17,17 @@ import { TransactionCategoriesService } from '../transaction-categories/transact
 export class TransactionsService {
   constructor(
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => WalletsService))
     private readonly walletService: WalletsService,
     private readonly transactionCategoriesService: TransactionCategoriesService,
     @InjectRepository(TransactionEntity)
     private readonly transactionsRepository: Repository<TransactionEntity>,
   ) {}
 
-  public async getAll(
-    userId: string,
-    request: TransactionQueryRequestDto,
-  ): Promise<Transaction[]> {
-    const query = this.transactionsRepository
-      .createQueryBuilder('transaction')
-      .leftJoinAndSelect('transaction.user', 'user')
-      .leftJoinAndSelect('transaction.wallet', 'wallet')
-      .leftJoinAndSelect('transaction.category', 'category')
-      .leftJoinAndSelect('wallet.currency', 'currency')
-      .where('transaction.user.id = :userId', { userId });
-    if (request.pagination) {
-      query.skip(request.pagination.page * request.pagination.limit);
-      query.take(request.pagination.limit);
-    }
-    if (request.dateBetween) {
-      query.andWhere(`transaction.date between :startDate and :endDate`, {
-        startDate: request.dateBetween.startDate,
-        endDate: request.dateBetween.endDate,
-      });
-    }
-    if (request.dateOrder) {
-      query.orderBy('transaction.date', request.dateOrder);
-    }
-    return query.getMany();
+  public async findAllWithParams(request?: TransactionQueryRequestDto) {
+    const query = this.createQueryFindManyConditionWithRelations(request);
+
+    return await query.getMany();
   }
 
   public async create(
@@ -94,5 +75,39 @@ export class TransactionsService {
       .where('id = :id', { id })
       .execute();
     return transaction;
+  }
+
+  public createQueryFindManyConditionWithRelations(
+    request?: TransactionQueryRequestDto,
+  ): SelectQueryBuilder<TransactionEntity> {
+    const defaultFilter = new TransactionFilter();
+    const filter = { ...defaultFilter, ...request };
+    const query = this.transactionsRepository
+      .createQueryBuilder('transaction')
+      .leftJoinAndSelect('transaction.user', 'user')
+      .leftJoinAndSelect('transaction.wallet', 'wallet')
+      .leftJoinAndSelect('transaction.category', 'category')
+      .leftJoinAndSelect('wallet.currency', 'currency')
+      .where((qb) => {
+        qb.where(
+          `(cast(:userId as uuid) is null OR transaction.user_id = :userId) AND ` +
+            `(cast(:currencyId as uuid) is null OR wallet.currency.id = :currencyId) AND ` +
+            `(cast(:walletId as uuid) is null OR transaction.wallet.id = :walletId) AND ` +
+            `(cast(:date as date) is null OR transaction.date = :date) AND ` +
+            `(cast(:fromDate as date) is null OR transaction.date >= :fromDate) AND ` +
+            `(cast(:toDate as date) is null OR transaction.date <= :toDate)`,
+          filter,
+        );
+      });
+    if (filter.dateOrder) query.orderBy('transaction.date', filter.dateOrder);
+    if (filter.pagination) {
+      query.skip(filter.pagination.page * filter.pagination.limit);
+      query.limit(filter.pagination.limit);
+    }
+    return query;
+  }
+
+  public async saveTransaction(transaction: TransactionEntity): Promise<void> {
+    await this.transactionsRepository.save(transaction);
   }
 }

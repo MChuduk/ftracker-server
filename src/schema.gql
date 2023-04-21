@@ -7,6 +7,8 @@ type TransactionCategoryDto {
   name: String!
   color: String!
   svgPath: String!
+  active: Boolean!
+  userId: String!
 }
 
 type UserDto {
@@ -29,6 +31,8 @@ type CurrencyDto {
   name: String!
   color: String!
   rate: Float!
+  createdAt: String!
+  updatedAt: String!
 }
 
 enum CurrencyType {
@@ -49,7 +53,9 @@ type TransactionDto {
   id: String!
   amount: Float!
   description: String!
-  date: DateTime!
+  date: String!
+  createdAt: String!
+  updatedAt: String!
   categoryId: String!
   userId: String!
   walletId: String!
@@ -57,24 +63,45 @@ type TransactionDto {
   category: TransactionCategoryDto!
 }
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
+type WalletStatsDto {
+  wallet: WalletDto!
+  totalAmount: Float!
+}
+
+type UserBudgetReportDataDto {
+  date: String!
+  totalAmount: Float!
+}
+
+type UserBudgetReportDto {
+  data: [UserBudgetReportDataDto!]!
+}
+
+type WalletActivityReportDataDto {
+  date: String!
+  count: Float!
+}
+
+type WalletActivityReportDto {
+  data: [WalletActivityReportDataDto!]!
+}
 
 type Query {
   currentUser: UserDto!
   defaultTransactionCategories: [TransactionCategoryDto!]!
-  transactionCategories: [TransactionCategoryDto!]!
-  wallets: [WalletDto!]!
+  transactionCategories(request: TransactionQueryCategoryDto!): [TransactionCategoryDto!]!
+  wallets(request: WalletQueryRequestDto!): [WalletDto!]!
   currency: [CurrencyDto!]!
   transactions(request: TransactionQueryRequestDto): [TransactionDto!]!
+  walletStats(request: WalletStatsQueryRequestDto!): WalletStatsDto!
+  walletActivityReport(request: WalletActivityReportQueryRequestDto!): WalletActivityReportDto!
+  userBudgetReport(request: TransactionQueryRequestDto!): UserBudgetReportDto!
 }
 
-input TransactionQueryRequestDto {
+input TransactionQueryCategoryDto {
   pagination: PaginationDto
-  dateBetween: DatePeriodDto
-  dateOrder: String
+  active: Boolean
+  searchByName: String
 }
 
 input PaginationDto {
@@ -82,9 +109,33 @@ input PaginationDto {
   limit: Float!
 }
 
-input DatePeriodDto {
-  startDate: DateTime!
-  endDate: DateTime!
+input WalletQueryRequestDto {
+  userId: ID
+  walletId: ID
+  searchByName: String
+}
+
+input TransactionQueryRequestDto {
+  pagination: PaginationDto
+  userId: String
+  walletId: ID
+  currencyId: ID
+  date: String
+  fromDate: String
+  toDate: String
+  dateOrder: String
+}
+
+input WalletStatsQueryRequestDto {
+  walletId: ID!
+  fromDate: String
+  toDate: String
+}
+
+input WalletActivityReportQueryRequestDto {
+  walletId: ID!
+  fromDate: String
+  toDate: String
 }
 
 type Mutation {
@@ -92,8 +143,12 @@ type Mutation {
   signIn(request: SignInRequestDto!): SessionDto!
   logout: SessionDto!
   refresh: SessionDto!
+  updateTransactionCategory(request: TransactionCategoryUpdateDto!): TransactionCategoryDto!
+  createTransactionCategory(request: TransactionCategoryCreateRequestDto!): TransactionCategoryDto!
+  deleteTransactionCategory(request: TransactionCategoryDeleteRequestDto!): TransactionCategoryDto!
   createWallet(request: WalletCreateRequestDto!): WalletDto!
   deleteWallet(request: WalletDeleteRequestDto!): WalletDto!
+  updateWallet(request: WalletUpdateRequestDto!): WalletDto!
   createTransaction(request: TransactionCreateRequestDto!): TransactionDto!
   deleteTransaction(request: TransactionDeleteRequestDto!): TransactionDto!
 }
@@ -109,6 +164,21 @@ input SignInRequestDto {
   password: String!
 }
 
+input TransactionCategoryUpdateDto {
+  categoryId: ID!
+  active: Boolean
+}
+
+input TransactionCategoryCreateRequestDto {
+  name: String!
+  svgPath: String!
+  color: String!
+}
+
+input TransactionCategoryDeleteRequestDto {
+  categoryId: ID!
+}
+
 input WalletCreateRequestDto {
   name: String!
   currencyId: ID!
@@ -118,6 +188,12 @@ input WalletDeleteRequestDto {
   walletId: ID!
 }
 
+input WalletUpdateRequestDto {
+  walletId: ID!
+  name: String
+  currencyId: ID!
+}
+
 input TransactionCreateRequestDto {
   amount: Float!
   description: String!
@@ -125,6 +201,11 @@ input TransactionCreateRequestDto {
   categoryId: ID!
   walletId: ID!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 input TransactionDeleteRequestDto {
   transactionId: ID!

@@ -60,6 +60,8 @@ export class CurrencyService implements OnModuleInit {
     await this.upsertCurrency({
       type: CurrencyType.BYN,
       name: 'Белорусский рубль',
+      createdAt: new Date(),
+      updatedAt: new Date(),
       rate: 1,
       color: '',
     });
@@ -81,6 +83,8 @@ export class CurrencyService implements OnModuleInit {
           type: CurrencyType[type],
           name: data.Cur_Name,
           rate: +data.Cur_OfficialRate,
+          createdAt: new Date(),
+          updatedAt: new Date(),
           color: '',
         });
       } catch (error) {

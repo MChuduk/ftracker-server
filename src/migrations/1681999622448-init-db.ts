@@ -1,36 +1,36 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { DEFAULT_TRANSACTION_CATEGORIES } from '../data';
 
-export class initDb1680634949668 implements MigrationInterface {
-  name = 'initDb1680634949668';
+export class initDb1681999622448 implements MigrationInterface {
+  name = 'initDb1681999622448';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `CREATE TABLE "user_settings" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_00f004f5922a0744d174530d639" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "display_name" character varying(255) NOT NULL, "email" character varying(255) NOT NULL, "password" character varying(255) NOT NULL, "settings_id" uuid NOT NULL, CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "REL_aa03f4d6277ce01b387c99d856" UNIQUE ("settings_id"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "transaction_categories" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying(255) NOT NULL, "color" character varying(255) NOT NULL, "svg_path" character varying NOT NULL, "user_id" uuid, CONSTRAINT "UQ_45b03d0bdd23e65581f03ec2818" UNIQUE ("user_id"), CONSTRAINT "PK_bbd38b9174546b0ed4fe04689c7" PRIMARY KEY ("id"))`,
+    );
     await queryRunner.query(
       `CREATE TYPE "public"."type" AS ENUM('BYN', 'USD', 'EUR')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "currency" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "type" "public"."type" NOT NULL, "name" character varying(255) NOT NULL, "color" character varying(255) NOT NULL, "rate" numeric NOT NULL, CONSTRAINT "PK_3cda65c731a6264f0e444cc9b91" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "currency" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "type" "public"."type" NOT NULL, "name" character varying(255) NOT NULL, "color" character varying(255) NOT NULL, "rate" numeric(12,2) NOT NULL, CONSTRAINT "PK_3cda65c731a6264f0e444cc9b91" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "user_settings" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), CONSTRAINT "PK_00f004f5922a0744d174530d639" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "sessions" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "refresh_token" character varying(255), "user_id" uuid NOT NULL, CONSTRAINT "PK_3238ef96f18b355b671619111bc" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "display_name" character varying(255) NOT NULL, "email" character varying(255) NOT NULL, "password" character varying(255) NOT NULL, "settings_id" uuid NOT NULL, CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "REL_aa03f4d6277ce01b387c99d856" UNIQUE ("settings_id"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "user_transaction_categories" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "user_id" uuid NOT NULL, "transaction_category_id" uuid NOT NULL, "active" boolean NOT NULL DEFAULT true, CONSTRAINT "PK_3f4da06591db143167c68e31876" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "transaction_categories" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "color" character varying(255) NOT NULL, "svg_path" character varying NOT NULL, "user_id" uuid, CONSTRAINT "UQ_45b03d0bdd23e65581f03ec2818" UNIQUE ("user_id"), CONSTRAINT "PK_bbd38b9174546b0ed4fe04689c7" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "wallets" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "name" character varying(255) NOT NULL, "user_id" uuid NOT NULL, "currency_id" uuid NOT NULL, CONSTRAINT "PK_8402e5df5a30a229380e83e4f7e" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "sessions" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "refresh_token" character varying(255), "user_id" uuid NOT NULL, CONSTRAINT "PK_3238ef96f18b355b671619111bc" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE "user_transaction_categories" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "user_id" uuid NOT NULL, "transaction_category_id" uuid NOT NULL, CONSTRAINT "PK_3f4da06591db143167c68e31876" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE "wallets" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "user_id" uuid NOT NULL, "currency_id" uuid NOT NULL, CONSTRAINT "PK_8402e5df5a30a229380e83e4f7e" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE "transactions" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "amount" numeric NOT NULL, "description" character varying(255) NOT NULL, "date" TIMESTAMP WITH TIME ZONE NOT NULL, "category_id" uuid NOT NULL, "wallet_id" uuid NOT NULL, "user_id" uuid NOT NULL, CONSTRAINT "PK_a219afd8dd77ed80f5a862f1db9" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "transactions" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "amount" numeric(12,2) NOT NULL, "description" character varying(255) NOT NULL, "date" date NOT NULL, "category_id" uuid NOT NULL, "wallet_id" uuid NOT NULL, "user_id" uuid NOT NULL, CONSTRAINT "PK_a219afd8dd77ed80f5a862f1db9" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `ALTER TABLE "users" ADD CONSTRAINT "FK_aa03f4d6277ce01b387c99d8569" FOREIGN KEY ("settings_id") REFERENCES "user_settings"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
@@ -105,10 +105,10 @@ export class initDb1680634949668 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "wallets"`);
     await queryRunner.query(`DROP TABLE "user_transaction_categories"`);
     await queryRunner.query(`DROP TABLE "sessions"`);
+    await queryRunner.query(`DROP TABLE "currency"`);
+    await queryRunner.query(`DROP TYPE "public"."type"`);
     await queryRunner.query(`DROP TABLE "transaction_categories"`);
     await queryRunner.query(`DROP TABLE "users"`);
     await queryRunner.query(`DROP TABLE "user_settings"`);
-    await queryRunner.query(`DROP TABLE "currency"`);
-    await queryRunner.query(`DROP TYPE "public"."type"`);
   }
 }
