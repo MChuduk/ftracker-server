@@ -112,6 +112,7 @@ input PaginationDto {
 input WalletQueryRequestDto {
   userId: ID
   walletId: ID
+  searchByName: String
 }
 
 input TransactionQueryRequestDto {

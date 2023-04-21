@@ -12,4 +12,8 @@ export class WalletQueryRequestDto {
   @IsOptional()
   @IsUUID('4')
   readonly walletId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  readonly searchByName?: string;
 }

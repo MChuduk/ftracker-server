@@ -44,6 +44,12 @@ export class WalletsService {
           filter,
         );
       });
+
+    if (request.searchByName) {
+      query.andWhere('wallet.name ILIKE :name', {
+        name: `%${request.searchByName}%`,
+      });
+    }
     return query.getMany();
   }
 
