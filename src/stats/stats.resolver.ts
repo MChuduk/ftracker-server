@@ -1,6 +1,8 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { StatsService } from './stats.service';
 import {
+  TransactionCategoriesReport,
+  TransactionCategoriesStatsQueryDto,
   UserBudgetReportDto,
   WalletActivityReportDto,
   WalletActivityReportQueryRequestDto,
@@ -34,5 +36,15 @@ export class StatsResolver {
     @Args('request') request: TransactionQueryRequestDto,
   ): Promise<UserBudgetReportDto> {
     return this.statsService.getUserBudgetReport(request);
+  }
+
+  @Query(() => TransactionCategoriesReport, {
+    name: 'transactionCategoriesReport',
+  })
+  public async transactionCategoriesReport(
+    @UserId() userId: string,
+    @Args('request') request: TransactionCategoriesStatsQueryDto,
+  ): Promise<TransactionCategoriesReport> {
+    return this.statsService.getTransactionsCategoriesReport(userId, request);
   }
 }

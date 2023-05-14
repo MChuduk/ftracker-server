@@ -86,6 +86,16 @@ type WalletActivityReportDto {
   data: [WalletActivityReportDataDto!]!
 }
 
+type TransactionCategoriesReportDataDto {
+  category: String!
+  categoryColor: String!
+  totalAmount: Float!
+}
+
+type TransactionCategoriesReport {
+  data: [TransactionCategoriesReportDataDto!]!
+}
+
 type Query {
   currentUser: UserDto!
   defaultTransactionCategories: [TransactionCategoryDto!]!
@@ -96,6 +106,7 @@ type Query {
   walletStats(request: WalletStatsQueryRequestDto!): WalletStatsDto!
   walletActivityReport(request: WalletActivityReportQueryRequestDto!): WalletActivityReportDto!
   userBudgetReport(request: TransactionQueryRequestDto!): UserBudgetReportDto!
+  transactionCategoriesReport(request: TransactionCategoriesStatsQueryDto!): TransactionCategoriesReport!
 }
 
 input TransactionQueryCategoryDto {
@@ -134,6 +145,12 @@ input WalletStatsQueryRequestDto {
 
 input WalletActivityReportQueryRequestDto {
   walletId: ID!
+  fromDate: String
+  toDate: String
+}
+
+input TransactionCategoriesStatsQueryDto {
+  walletId: ID
   fromDate: String
   toDate: String
 }

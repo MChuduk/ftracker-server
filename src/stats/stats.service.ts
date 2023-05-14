@@ -1,5 +1,8 @@
 import { TransactionsService } from '../transactions/transactions.service';
 import {
+  TransactionCategoriesReport,
+  TransactionCategoriesReportDataDto,
+  TransactionCategoriesStatsQueryDto,
   UserBudgetReportDataDto,
   UserBudgetReportDto,
   WalletActivityReportDataDto,
@@ -108,6 +111,42 @@ export class StatsService {
         date: row.date,
         count,
       });
+    }
+    return { data };
+  }
+
+  public async getTransactionsCategoriesReport(
+    userId: string,
+    request: TransactionCategoriesStatsQueryDto,
+  ): Promise<TransactionCategoriesReport> {
+    const date = new Date();
+    const fromDate =
+      request.fromDate ||
+      new Date(date.getFullYear(), date.getMonth(), 1).toISOString();
+    const toDate =
+      request.toDate ||
+      new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString();
+    const transactions = await this.transactionsService.findAllWithParams({
+      userId,
+      fromDate,
+      toDate,
+      ...request,
+    });
+    const data: TransactionCategoriesReportDataDto[] = [];
+    const transactionCategories = new Set(
+      ...[transactions.map((x) => x.category.name)],
+    );
+    for (const category of transactionCategories) {
+      const categoryColor = transactions.find(
+        (x) => x.category.name === category,
+      ).category.color;
+      const totalAmount = transactions
+        .filter((x) => x.category.name === category)
+        .reduce(
+          (acc, curr) => (acc += +(curr.amount * curr.wallet.currency.rate)),
+          0,
+        );
+      data.push({ category, totalAmount, categoryColor });
     }
     return { data };
   }
