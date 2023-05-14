@@ -102,7 +102,7 @@ export class TransactionsService {
     if (filter.dateOrder) query.orderBy('transaction.date', filter.dateOrder);
     if (filter.pagination) {
       query.skip(filter.pagination.page * filter.pagination.limit);
-      query.limit(filter.pagination.limit);
+      query.take(filter.pagination.limit);
     }
     return query;
   }
