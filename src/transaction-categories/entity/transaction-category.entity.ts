@@ -29,7 +29,6 @@ export class TransactionCategoryEntity extends BaseEntity {
   @Column({
     name: 'user_id',
     type: 'uuid',
-    unique: true,
     nullable: true,
   })
   userId: string;
