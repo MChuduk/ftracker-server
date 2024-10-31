@@ -29,7 +29,7 @@ export class CurrencyService implements OnModuleInit {
   }
 
   public async getAll(): Promise<Currency[]> {
-    return await this.currencyRepository.createQueryBuilder().getMany();
+    return this.currencyRepository.createQueryBuilder().getMany();
   }
 
   public async updateCurrencyRate(id: string, rate: number) {
@@ -50,7 +50,7 @@ export class CurrencyService implements OnModuleInit {
   }
 
   public async getById(id: string): Promise<Currency> {
-    return await this.currencyRepository
+    return this.currencyRepository
       .createQueryBuilder('currency')
       .where('currency.id = :id', { id })
       .getOne();
@@ -96,9 +96,9 @@ export class CurrencyService implements OnModuleInit {
   private async upsertCurrency(newCurrency: Currency): Promise<void> {
     const currency = await this.getByType(newCurrency.type);
     if (currency) {
-      return await this.updateCurrencyRate(currency.id, newCurrency.rate);
+      return this.updateCurrencyRate(currency.id, newCurrency.rate);
     } else {
-      return await this.create(newCurrency);
+      return this.create(newCurrency);
     }
   }
 }
